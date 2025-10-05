@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GripVertical } from 'lucide-react';
 
@@ -15,6 +15,14 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
   const [touchStartY, setTouchStartY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const touchRef = useRef<HTMLDivElement>(null);
+
+  // Cleanup global event listeners on unmount
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, []);
 
   const handleTouchStart = (e: React.TouchEvent, index: number) => {
     const touch = e.touches[0];
@@ -65,9 +73,13 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
     setIsDragging(true);
     e.preventDefault();
     e.stopPropagation();
+    
+    // Add global mouse event listeners for smoother dragging
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleGlobalMouseMove = (e: MouseEvent) => {
     if (!isDragging || draggedIndex === null) return;
     
     const deltaY = e.clientY - touchStartY;
@@ -79,7 +91,7 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
     setDragOverIndex(clampedIndex);
   };
 
-  const handleMouseUp = () => {
+  const handleGlobalMouseUp = () => {
     if (draggedIndex !== null && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
       const newItems = [...items];
       const draggedItem = newItems[draggedIndex];
@@ -93,6 +105,18 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
     setDraggedIndex(null);
     setDragOverIndex(null);
     setIsDragging(false);
+    
+    // Remove global event listeners
+    document.removeEventListener('mousemove', handleGlobalMouseMove);
+    document.removeEventListener('mouseup', handleGlobalMouseUp);
+  };
+
+  const handleMouseMove = () => {
+    // This is now handled by global mouse move for better performance
+  };
+
+  const handleMouseUp = () => {
+    // This is now handled by global mouse up for better performance
   };
 
   return (
@@ -107,8 +131,14 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
           animate={{
             y: draggedIndex === index && isDragging ? (dragOverIndex || 0) * 80 : 0,
             zIndex: draggedIndex === index ? 50 : 1,
+            scale: draggedIndex === index && isDragging ? 1.05 : 1,
           }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: draggedIndex === index ? 400 : 300, 
+            damping: 25,
+            duration: isDragging ? 0.1 : 0.3
+          }}
         >
           <div className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
             draggedIndex === index
@@ -118,7 +148,9 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
             <div className="flex items-center space-x-3 w-full">
               {/* Drag handle - ONLY for dragging */}
               <div 
-                className="p-2 -m-2 touch-manipulation cursor-grab active:cursor-grabbing flex-shrink-0"
+                className={`p-2 -m-2 touch-manipulation cursor-grab active:cursor-grabbing flex-shrink-0 rounded transition-colors ${
+                  draggedIndex === index ? 'bg-primary-100' : 'hover:bg-gray-100'
+                }`}
                 onTouchStart={(e) => handleTouchStart(e, index)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -126,7 +158,9 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
               >
-                <GripVertical className="h-5 w-5 text-gray-400" />
+                <GripVertical className={`h-5 w-5 transition-colors ${
+                  draggedIndex === index ? 'text-primary-600' : 'text-gray-400'
+                }`} />
               </div>
               
               {/* Clickable area for dealer selection - NO drag events */}
