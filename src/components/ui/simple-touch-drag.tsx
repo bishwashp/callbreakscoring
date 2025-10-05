@@ -240,7 +240,7 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
                 onMouseUp={(e) => e.stopPropagation()}
                 onMouseDown={(e) => {
                   console.log('PLAYER CONTENT MOUSE DOWN:', e.target);
-                  e.stopPropagation();
+                  // Don't stop propagation - let click events through
                 }}
               >
                 {children(item, index)}
