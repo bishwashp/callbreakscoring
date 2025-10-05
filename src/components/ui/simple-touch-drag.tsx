@@ -22,6 +22,7 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
     setDraggedIndex(index);
     setIsDragging(true);
     e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -37,6 +38,7 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
     
     setDragOverIndex(clampedIndex);
     e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleTouchEnd = () => {
@@ -61,6 +63,8 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
     setTouchStartY(e.clientY);
     setDraggedIndex(index);
     setIsDragging(true);
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -106,44 +110,35 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
           }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-          <div className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-move touch-manipulation ${
+          <div className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
             draggedIndex === index
               ? 'border-primary bg-primary-50 opacity-80'
               : 'border-gray-200 hover:border-gray-300 bg-white'
           }`}>
-            <div className="flex items-center space-x-3">
-              {/* Drag handle - only responds to drag gestures */}
+            <div className="flex items-center space-x-3 w-full">
+              {/* Drag handle - ONLY for dragging */}
               <div 
-                className="p-2 -m-2 touch-manipulation cursor-grab active:cursor-grabbing"
-                onTouchStart={(e) => {
-                  e.stopPropagation();
-                  handleTouchStart(e, index);
-                }}
-                onTouchMove={(e) => {
-                  e.stopPropagation();
-                  handleTouchMove(e);
-                }}
-                onTouchEnd={(e) => {
-                  e.stopPropagation();
-                  handleTouchEnd();
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  handleMouseDown(e, index);
-                }}
-                onMouseMove={(e) => {
-                  e.stopPropagation();
-                  handleMouseMove(e);
-                }}
-                onMouseUp={(e) => {
-                  e.stopPropagation();
-                  handleMouseUp();
-                }}
+                className="p-2 -m-2 touch-manipulation cursor-grab active:cursor-grabbing flex-shrink-0"
+                onTouchStart={(e) => handleTouchStart(e, index)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onMouseDown={(e) => handleMouseDown(e, index)}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
               >
                 <GripVertical className="h-5 w-5 text-gray-400" />
               </div>
-              {/* Clickable area for dealer selection */}
-              <div className="flex-1">
+              
+              {/* Clickable area for dealer selection - NO drag events */}
+              <div 
+                className="flex-1 cursor-pointer"
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                onMouseMove={(e) => e.stopPropagation()}
+                onMouseUp={(e) => e.stopPropagation()}
+              >
                 {children(item, index)}
               </div>
             </div>

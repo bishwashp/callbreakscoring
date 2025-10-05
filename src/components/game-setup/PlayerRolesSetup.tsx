@@ -44,6 +44,9 @@ export function PlayerRolesSetup() {
           <CardDescription className="text-center text-white/80">
             Drag grip icon to arrange seating • Tap player to assign dealer
           </CardDescription>
+          <div className="text-center text-xs text-white/60">
+            Current dealer: {selectedDealer + 1} ({players[selectedDealer]?.name || 'Unknown'})
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <SimpleTouchDrag
@@ -53,7 +56,18 @@ export function PlayerRolesSetup() {
             {(player, index) => (
               <div 
                 className="flex items-center justify-between w-full cursor-pointer"
-                onClick={() => setSelectedDealer(index)}
+                onClick={(e) => {
+                  console.log('Dealer selection clicked:', index, player.name);
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedDealer(index);
+                }}
+                onTouchEnd={(e) => {
+                  console.log('Dealer selection touched:', index, player.name);
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedDealer(index);
+                }}
               >
                 <div className="flex items-center space-x-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
