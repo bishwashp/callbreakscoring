@@ -85,17 +85,36 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
     const deltaY = e.clientY - touchStartY;
     const itemHeight = 80;
     
-    const hoverIndex = Math.round(deltaY / itemHeight) + draggedIndex;
-    const clampedIndex = Math.max(0, Math.min(items.length - 1, hoverIndex));
+    // Simple calculation: move to adjacent position based on drag distance
+    let hoverIndex = draggedIndex;
     
-    setDragOverIndex(clampedIndex);
+    if (deltaY > itemHeight) {
+      // Dragged down more than one item height
+      hoverIndex = Math.min(items.length - 1, draggedIndex + 1);
+    } else if (deltaY < -itemHeight) {
+      // Dragged up more than one item height  
+      hoverIndex = Math.max(0, draggedIndex - 1);
+    } else if (Math.abs(deltaY) > 20) {
+      // Small movement - determine direction
+      if (deltaY > 0) {
+        hoverIndex = Math.min(items.length - 1, draggedIndex + 1);
+      } else {
+        hoverIndex = Math.max(0, draggedIndex - 1);
+      }
+    }
+    
+    console.log('Mouse drag:', { deltaY, draggedIndex, hoverIndex, itemHeight });
+    setDragOverIndex(hoverIndex);
   };
 
   const handleGlobalMouseUp = () => {
+    console.log('Mouse up:', { draggedIndex, dragOverIndex, shouldReorder: draggedIndex !== dragOverIndex });
+    
     if (draggedIndex !== null && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
       const newItems = [...items];
       const draggedItem = newItems[draggedIndex];
       
+      console.log('Reordering from', draggedIndex, 'to', dragOverIndex);
       newItems.splice(draggedIndex, 1);
       newItems.splice(dragOverIndex, 0, draggedItem);
       
