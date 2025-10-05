@@ -51,6 +51,7 @@ const viewFlow: GameView[] = [
   'player-count',
   'player-details',
   'player-roles',
+  'stakes-setup',
   'player-calls',
   'player-results',
   'round-summary',
