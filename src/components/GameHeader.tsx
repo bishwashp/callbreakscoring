@@ -33,33 +33,38 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
   if (!currentGame || currentGame.status !== 'in-progress') return null;
 
   return (
-    <div className="bg-white shadow-sm border-b border-gray-200">
+    <div className="bg-white shadow-sm border-b border-gray-200 safe-top">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
           {showHomeButton && (
             <Button
               variant="ghost"
               size="icon"
               onClick={handleGoHome}
               title="Go Home"
+              className="flex-shrink-0"
             >
-              <Home className="h-5 w-5" />
+              <Home className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
           )}
-          <div>
-            <h2 className="font-semibold text-gray-900">Round {currentGame.currentRound} of 5</h2>
-            <p className="text-xs text-gray-500">{currentGame.players.length} players</p>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-semibold text-gray-900 fluid-text-base truncate">
+              Round {currentGame.currentRound} of 5
+            </h2>
+            <p className="fluid-text-xs text-gray-500">
+              {currentGame.players.length} players
+            </p>
           </div>
         </div>
         
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setShowMenu(!showMenu)}
             title="Menu"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
           
           {showMenu && (
@@ -71,13 +76,13 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
                 <button
                   onClick={handleGoHome}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                  className="w-full text-left px-4 py-3 text-base sm:text-sm hover:bg-gray-50 transition-colors touch-active min-h-[48px] flex items-center"
                 >
                   Go Home
                 </button>
                 <button
                   onClick={handleCancelGame}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  className="w-full text-left px-4 py-3 text-base sm:text-sm text-red-600 hover:bg-red-50 transition-colors touch-active min-h-[48px] flex items-center"
                 >
                   Cancel Game
                 </button>

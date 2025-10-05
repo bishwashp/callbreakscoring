@@ -6,14 +6,34 @@ export interface InputProps
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
+    // Add mobile-optimized attributes for number inputs
+    const numberInputProps = type === 'number' ? {
+      inputMode: 'numeric' as const,
+      pattern: '[0-9]*'
+    } : {};
+    
     return (
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          // Base styles with better mobile touch targets
+          "flex min-h-[48px] w-full rounded-md border-2 border-gray-300 bg-white px-4 py-3",
+          // Typography - 16px minimum to prevent zoom on iOS
+          "text-base font-medium sm:text-sm",
+          // Focus and interaction states
+          "ring-offset-white placeholder:text-gray-400",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+          "focus:border-primary transition-colors",
+          // Disabled state
+          "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50",
+          // File input styles
+          "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+          // Touch feedback
+          "tap-highlight",
           className
         )}
         ref={ref}
+        {...numberInputProps}
         {...props}
       />
     )

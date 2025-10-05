@@ -80,7 +80,7 @@ export function CallEntry() {
                     <span className="font-medium">{player.name}</span>
                   </div>
                 </div>
-                <div className="w-24">
+                <div className="w-28 sm:w-24 flex-shrink-0">
                   <Input
                     type="number"
                     min="1"
@@ -88,7 +88,7 @@ export function CallEntry() {
                     placeholder="Call"
                     value={calls[player.id] || ''}
                     onChange={(e) => handleCallChange(player.id, e.target.value)}
-                    className="text-center text-lg font-semibold"
+                    className="text-center text-xl font-bold sm:text-lg"
                   />
                 </div>
               </div>

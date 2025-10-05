@@ -85,7 +85,7 @@ export function ResultEntry() {
                           <p className="text-xs text-gray-500">Called: {call}</p>
                         </div>
                       </div>
-                      <div className="w-24">
+                      <div className="w-28 sm:w-24 flex-shrink-0">
                         <Input
                           type="number"
                           min="0"
@@ -93,7 +93,7 @@ export function ResultEntry() {
                           placeholder="0"
                           value={results[player.id] ?? ''}
                           onChange={(e) => handleResultChange(player.id, e.target.value)}
-                          className="text-center text-lg font-semibold"
+                          className="text-center text-xl font-bold sm:text-lg"
                         />
                       </div>
                     </div>

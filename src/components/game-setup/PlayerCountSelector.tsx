@@ -43,21 +43,21 @@ export function PlayerCountSelector() {
                 size="icon"
                 onClick={handleDecrement}
                 disabled={playerCount <= 4}
-                className="h-12 w-12"
+                className="flex-shrink-0"
               >
-                <Minus className="h-5 w-5" />
+                <Minus className="h-6 w-6 sm:h-5 sm:w-5" />
               </Button>
-              <div className="w-24 h-24 flex items-center justify-center bg-gray-100 rounded-lg border-2 border-gray-200">
-                <span className="text-5xl font-bold text-primary">{playerCount}</span>
+              <div className="w-28 h-28 sm:w-24 sm:h-24 flex items-center justify-center bg-gray-100 rounded-lg border-2 border-gray-200 flex-shrink-0">
+                <span className="fluid-text-4xl font-bold text-primary">{playerCount}</span>
               </div>
               <Button
                 variant="outline"
                 size="icon"
                 onClick={handleIncrement}
                 disabled={playerCount >= 5}
-                className="h-12 w-12"
+                className="flex-shrink-0"
               >
-                <Plus className="h-5 w-5" />
+                <Plus className="h-6 w-6 sm:h-5 sm:w-5" />
               </Button>
             </div>
           </div>

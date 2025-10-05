@@ -27,6 +27,20 @@ export default {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      spacing: {
+        'safe-top': 'var(--safe-area-top)',
+        'safe-right': 'var(--safe-area-right)',
+        'safe-bottom': 'var(--safe-area-bottom)',
+        'safe-left': 'var(--safe-area-left)',
+      },
+      minHeight: {
+        'touch': '48px',
+        'touch-sm': '44px',
+      },
+      minWidth: {
+        'touch': '48px',
+        'touch-sm': '44px',
+      },
     },
   },
   plugins: [],
