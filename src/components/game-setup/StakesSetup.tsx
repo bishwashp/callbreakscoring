@@ -77,7 +77,6 @@ export function StakesSetup() {
           <div className="space-y-3">
             <label className="text-sm font-medium text-gray-700">Payment by Rank</label>
             {amounts.map((amount, index) => {
-              const rank = index + 1; // 1st lowest, 2nd lowest, etc.
               const position = playerCount - index; // 4th place, 3rd place, 2nd place
               return (
                 <div key={index} className="flex items-center space-x-3">

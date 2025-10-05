@@ -42,11 +42,11 @@ export function GameComplete() {
             <div className="space-y-2">
               <p className="text-xl text-gray-700">🎉 Congratulations! 🎉</p>
               <p className="text-3xl font-bold text-primary">{winner.name}</p>
-              {payouts && (
+              {payouts && currentGame?.stakes && (
                 <div className="mt-4 inline-block bg-green-100 border-2 border-green-300 rounded-lg px-6 py-3">
                   <p className="text-sm text-green-800 font-medium">Wins</p>
                   <p className="text-3xl font-bold text-green-700">
-                    {currentGame.stakes!.currency}{payouts[0].amountPaid.toFixed(2)}
+                    {currentGame.stakes.currency}{payouts[0].amountPaid.toFixed(2)}
                   </p>
                 </div>
               )}
