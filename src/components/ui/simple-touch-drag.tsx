@@ -15,6 +15,14 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
   const [touchStartY, setTouchStartY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const touchRef = useRef<HTMLDivElement>(null);
+  
+  // Use refs to track drag state for immediate access in event handlers
+  const dragStateRef = useRef({
+    draggedIndex: null as number | null,
+    dragOverIndex: null as number | null,
+    isDragging: false,
+    touchStartY: 0
+  });
 
   // Cleanup global event listeners on unmount
   useEffect(() => {
@@ -69,11 +77,24 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
 
   const handleMouseDown = (e: React.MouseEvent, index: number) => {
     console.log('Mouse down triggered:', { index, clientY: e.clientY });
+    
+    // Update both state and ref
     setTouchStartY(e.clientY);
     setDraggedIndex(index);
     setIsDragging(true);
+    
+    // Update ref for immediate access
+    dragStateRef.current = {
+      draggedIndex: index,
+      dragOverIndex: null,
+      isDragging: true,
+      touchStartY: e.clientY
+    };
+    
     e.preventDefault();
     e.stopPropagation();
+    
+    console.log('State set - draggedIndex:', index, 'isDragging: true');
     
     // Add global mouse event listeners for smoother dragging
     document.addEventListener('mousemove', handleGlobalMouseMove);
@@ -81,50 +102,76 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
   };
 
   const handleGlobalMouseMove = (e: MouseEvent) => {
-    if (!isDragging || draggedIndex === null) return;
+    const dragState = dragStateRef.current;
+    console.log('Mouse move called:', { 
+      isDragging: dragState.isDragging, 
+      draggedIndex: dragState.draggedIndex, 
+      clientY: e.clientY 
+    });
     
-    const deltaY = e.clientY - touchStartY;
+    if (!dragState.isDragging || dragState.draggedIndex === null) {
+      console.log('Mouse move early return - isDragging:', dragState.isDragging, 'draggedIndex:', dragState.draggedIndex);
+      return;
+    }
+    
+    const deltaY = e.clientY - dragState.touchStartY;
     const itemHeight = 80;
     
     // Simple calculation: move to adjacent position based on drag distance
-    let hoverIndex = draggedIndex;
+    let hoverIndex = dragState.draggedIndex;
     
     if (deltaY > itemHeight) {
       // Dragged down more than one item height
-      hoverIndex = Math.min(items.length - 1, draggedIndex + 1);
+      hoverIndex = Math.min(items.length - 1, dragState.draggedIndex + 1);
     } else if (deltaY < -itemHeight) {
       // Dragged up more than one item height  
-      hoverIndex = Math.max(0, draggedIndex - 1);
+      hoverIndex = Math.max(0, dragState.draggedIndex - 1);
     } else if (Math.abs(deltaY) > 20) {
       // Small movement - determine direction
       if (deltaY > 0) {
-        hoverIndex = Math.min(items.length - 1, draggedIndex + 1);
+        hoverIndex = Math.min(items.length - 1, dragState.draggedIndex + 1);
       } else {
-        hoverIndex = Math.max(0, draggedIndex - 1);
+        hoverIndex = Math.max(0, dragState.draggedIndex - 1);
       }
     }
     
-    console.log('Mouse drag:', { deltaY, draggedIndex, hoverIndex, itemHeight });
+    console.log('Mouse drag:', { deltaY, draggedIndex: dragState.draggedIndex, hoverIndex, itemHeight });
+    
+    // Update both state and ref
+    dragState.dragOverIndex = hoverIndex;
     setDragOverIndex(hoverIndex);
   };
 
   const handleGlobalMouseUp = () => {
-    console.log('Mouse up:', { draggedIndex, dragOverIndex, shouldReorder: draggedIndex !== dragOverIndex });
+    const dragState = dragStateRef.current;
+    console.log('Mouse up:', { 
+      draggedIndex: dragState.draggedIndex, 
+      dragOverIndex: dragState.dragOverIndex, 
+      shouldReorder: dragState.draggedIndex !== dragState.dragOverIndex 
+    });
     
-    if (draggedIndex !== null && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
+    if (dragState.draggedIndex !== null && dragState.dragOverIndex !== null && dragState.draggedIndex !== dragState.dragOverIndex) {
       const newItems = [...items];
-      const draggedItem = newItems[draggedIndex];
+      const draggedItem = newItems[dragState.draggedIndex];
       
-      console.log('Reordering from', draggedIndex, 'to', dragOverIndex);
-      newItems.splice(draggedIndex, 1);
-      newItems.splice(dragOverIndex, 0, draggedItem);
+      console.log('Reordering from', dragState.draggedIndex, 'to', dragState.dragOverIndex);
+      newItems.splice(dragState.draggedIndex, 1);
+      newItems.splice(dragState.dragOverIndex, 0, draggedItem);
       
       onReorder(newItems);
     }
     
+    // Reset both state and ref
     setDraggedIndex(null);
     setDragOverIndex(null);
     setIsDragging(false);
+    
+    dragStateRef.current = {
+      draggedIndex: null,
+      dragOverIndex: null,
+      isDragging: false,
+      touchStartY: 0
+    };
     
     // Remove global event listeners
     document.removeEventListener('mousemove', handleGlobalMouseMove);
