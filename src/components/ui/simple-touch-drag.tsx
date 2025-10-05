@@ -78,6 +78,15 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
   const handleMouseDown = (e: React.MouseEvent, index: number) => {
     console.log('Mouse down triggered:', { index, clientY: e.clientY });
     
+    // Only start drag if clicking on the grip handle, not the player content
+    const target = e.target as HTMLElement;
+    const isGripHandle = target.closest('.drag-handle');
+    
+    if (!isGripHandle) {
+      console.log('Mouse down not on grip handle - ignoring drag');
+      return;
+    }
+    
     // Update both state and ref
     setTouchStartY(e.clientY);
     setDraggedIndex(index);
@@ -215,7 +224,7 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
             <div className="flex items-center space-x-3 w-full">
               {/* Drag handle - ONLY for dragging */}
               <div 
-                className={`p-2 -m-2 touch-manipulation cursor-grab active:cursor-grabbing flex-shrink-0 rounded transition-colors ${
+                className={`drag-handle p-2 -m-2 touch-manipulation cursor-grab active:cursor-grabbing flex-shrink-0 rounded transition-colors ${
                   draggedIndex === index ? 'bg-primary-100' : 'hover:bg-gray-100'
                 }`}
                 onTouchStart={(e) => handleTouchStart(e, index)}
