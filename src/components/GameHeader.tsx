@@ -1,0 +1,91 @@
+import { Button } from '@/components/ui/button';
+import { useGameStore } from '@/store/gameStore';
+import { Home, Menu } from 'lucide-react';
+import { useState } from 'react';
+
+interface GameHeaderProps {
+  showHomeButton?: boolean;
+}
+
+export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
+  const { currentGame, goHome, deleteActiveGame, hasUnsavedChanges, setHasUnsavedChanges } = useGameStore();
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleGoHome = () => {
+    if (hasUnsavedChanges) {
+      if (confirm('You have unsaved changes. Going home will discard your current entries. Continue?')) {
+        setHasUnsavedChanges(false);
+        goHome();
+      }
+    } else {
+      goHome();
+    }
+    setShowMenu(false);
+  };
+
+  const handleCancelGame = async () => {
+    if (confirm('Are you sure you want to cancel this game? All progress will be lost.')) {
+      await deleteActiveGame();
+      setShowMenu(false);
+    }
+  };
+
+  if (!currentGame || currentGame.status !== 'in-progress') return null;
+
+  return (
+    <div className="bg-white shadow-sm border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          {showHomeButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleGoHome}
+              title="Go Home"
+            >
+              <Home className="h-5 w-5" />
+            </Button>
+          )}
+          <div>
+            <h2 className="font-semibold text-gray-900">Round {currentGame.currentRound} of 5</h2>
+            <p className="text-xs text-gray-500">{currentGame.players.length} players</p>
+          </div>
+        </div>
+        
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowMenu(!showMenu)}
+            title="Menu"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          
+          {showMenu && (
+            <>
+              <div 
+                className="fixed inset-0 z-10" 
+                onClick={() => setShowMenu(false)}
+              />
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                <button
+                  onClick={handleGoHome}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                >
+                  Go Home
+                </button>
+                <button
+                  onClick={handleCancelGame}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  Cancel Game
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
