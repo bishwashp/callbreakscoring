@@ -238,6 +238,10 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
                 onTouchEnd={(e) => e.stopPropagation()}
                 onMouseMove={(e) => e.stopPropagation()}
                 onMouseUp={(e) => e.stopPropagation()}
+                onMouseDown={(e) => {
+                  console.log('PLAYER CONTENT MOUSE DOWN:', e.target);
+                  e.stopPropagation();
+                }}
               >
                 {children(item, index)}
               </div>

@@ -60,7 +60,7 @@ export function PlayerRolesSetup() {
                 <div 
                   className="flex items-center space-x-3 cursor-pointer"
                   onClick={(e) => {
-                    console.log('Dealer selection clicked:', index, player.name);
+                    console.log('DEALER CLICK EVENT FIRED:', index, player.name, e.target);
                     e.preventDefault();
                     e.stopPropagation();
                     setSelectedDealer(index);
