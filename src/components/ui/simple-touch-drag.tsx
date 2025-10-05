@@ -99,6 +99,12 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
     // Add global mouse event listeners for smoother dragging
     document.addEventListener('mousemove', handleGlobalMouseMove);
     document.addEventListener('mouseup', handleGlobalMouseUp);
+    
+    // Safety cleanup after 5 seconds to prevent stuck listeners
+    setTimeout(() => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    }, 5000);
   };
 
   const handleGlobalMouseMove = (e: MouseEvent) => {
@@ -150,6 +156,10 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
       shouldReorder: dragState.draggedIndex !== dragState.dragOverIndex 
     });
     
+    // Remove global event listeners FIRST to prevent interference
+    document.removeEventListener('mousemove', handleGlobalMouseMove);
+    document.removeEventListener('mouseup', handleGlobalMouseUp);
+    
     if (dragState.draggedIndex !== null && dragState.dragOverIndex !== null && dragState.draggedIndex !== dragState.dragOverIndex) {
       const newItems = [...items];
       const draggedItem = newItems[dragState.draggedIndex];
@@ -172,10 +182,6 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
       isDragging: false,
       touchStartY: 0
     };
-    
-    // Remove global event listeners
-    document.removeEventListener('mousemove', handleGlobalMouseMove);
-    document.removeEventListener('mouseup', handleGlobalMouseUp);
   };
 
   const handleMouseMove = () => {
