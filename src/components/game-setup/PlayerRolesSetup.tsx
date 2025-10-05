@@ -55,21 +55,23 @@ export function PlayerRolesSetup() {
           >
             {(player, index) => (
               <div 
-                className="flex items-center justify-between w-full cursor-pointer"
-                onClick={(e) => {
-                  console.log('Dealer selection clicked:', index, player.name);
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setSelectedDealer(index);
-                }}
-                onTouchEnd={(e) => {
-                  console.log('Dealer selection touched:', index, player.name);
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setSelectedDealer(index);
-                }}
+                className="flex items-center justify-between w-full"
               >
-                <div className="flex items-center space-x-3">
+                <div 
+                  className="flex items-center space-x-3 cursor-pointer"
+                  onClick={(e) => {
+                    console.log('Dealer selection clicked:', index, player.name);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedDealer(index);
+                  }}
+                  onTouchEnd={(e) => {
+                    console.log('Dealer selection touched:', index, player.name);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedDealer(index);
+                  }}
+                >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
                     selectedDealer === index ? 'bg-primary text-white' : 'bg-white text-gray-700'
                   }`}>

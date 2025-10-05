@@ -68,6 +68,7 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
   };
 
   const handleMouseDown = (e: React.MouseEvent, index: number) => {
+    console.log('Mouse down triggered:', { index, clientY: e.clientY });
     setTouchStartY(e.clientY);
     setDraggedIndex(index);
     setIsDragging(true);
