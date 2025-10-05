@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useGameStore } from './store/gameStore';
 import { HomeScreen } from './components/HomeScreen';
 import { PlayerCountSelector } from './components/game-setup/PlayerCountSelector';
@@ -12,6 +13,9 @@ import { CallLog } from './components/gameplay/CallLog';
 import { GameComplete } from './components/gameplay/GameComplete';
 import { GameHistory } from './components/GameHistory';
 import { GameHeader } from './components/GameHeader';
+import { CardBackground } from './components/ui/card-background';
+import { PageTransition, StaggeredChildren } from './components/ui/page-transition';
+import { CardLoadingSpinner } from './components/ui/page-transition';
 
 function App() {
   const { currentView, isLoading, loadActiveGame, currentGame } = useGameStore();
@@ -22,12 +26,9 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
+      <CardBackground variant="table">
+        <CardLoadingSpinner />
+      </CardBackground>
     );
   }
 
@@ -39,21 +40,50 @@ function App() {
     'game-complete'
   ].includes(currentView);
 
+  // Determine background variant based on current view
+  const getBackgroundVariant = () => {
+    if (['home', 'game-history'].includes(currentView)) return 'elegant';
+    if (['player-count', 'player-details', 'player-roles', 'stakes-setup'].includes(currentView)) return 'casino';
+    return 'table';
+  };
+
+  // Determine transition direction based on view flow
+  const getTransitionDirection = () => {
+    const setupViews = ['player-count', 'player-details', 'player-roles', 'stakes-setup'];
+    const gameplayViews = ['player-calls', 'player-results', 'round-summary', 'call-log'];
+    
+    if (setupViews.includes(currentView)) return 'right';
+    if (gameplayViews.includes(currentView)) return 'left';
+    if (currentView === 'game-complete') return 'scale';
+    return 'fade';
+  };
+
   return (
-    <div className="min-h-screen">
+    <CardBackground variant={getBackgroundVariant()}>
       {showHeader && <GameHeader />}
-      {currentView === 'home' && <HomeScreen />}
-      {currentView === 'player-count' && <PlayerCountSelector />}
-      {currentView === 'player-details' && <PlayerDetailsForm />}
-      {currentView === 'player-roles' && <PlayerRolesSetup key={currentGame?.id} />}
-      {currentView === 'stakes-setup' && <StakesSetup />}
-      {currentView === 'player-calls' && <CallEntry />}
-      {currentView === 'player-results' && <ResultEntry />}
-      {currentView === 'round-summary' && <RoundSummary />}
-      {currentView === 'call-log' && <CallLog />}
-      {currentView === 'game-complete' && <GameComplete />}
-      {currentView === 'game-history' && <GameHistory />}
-    </div>
+      
+      <AnimatePresence mode="wait">
+        <PageTransition 
+          key={currentView} 
+          direction={getTransitionDirection()}
+          className="px-4 py-6"
+        >
+          <StaggeredChildren delay={0.1}>
+            {currentView === 'home' && <HomeScreen />}
+            {currentView === 'player-count' && <PlayerCountSelector />}
+            {currentView === 'player-details' && <PlayerDetailsForm />}
+            {currentView === 'player-roles' && <PlayerRolesSetup key={currentGame?.id} />}
+            {currentView === 'stakes-setup' && <StakesSetup />}
+            {currentView === 'player-calls' && <CallEntry />}
+            {currentView === 'player-results' && <ResultEntry />}
+            {currentView === 'round-summary' && <RoundSummary />}
+            {currentView === 'call-log' && <CallLog />}
+            {currentView === 'game-complete' && <GameComplete />}
+            {currentView === 'game-history' && <GameHistory />}
+          </StaggeredChildren>
+        </PageTransition>
+      </AnimatePresence>
+    </CardBackground>
   );
 }
 

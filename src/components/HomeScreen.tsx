@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameStore } from '@/store/gameStore';
 import { Play, Plus, Trash2, Trophy, Users, History } from 'lucide-react';
 import { formatScore } from '@/lib/scoring/calculator';
+import { AnimatedCard } from '@/components/ui/animated-card';
+import { AnimatedButton } from '@/components/ui/animated-button';
+import { FloatingCardDeck, CardSuits } from '@/components/ui/animated-card';
 
 export function HomeScreen() {
   const { currentGame, newGame, setView, deleteActiveGame } = useGameStore();
@@ -61,22 +63,37 @@ export function HomeScreen() {
   const hasActiveGame = currentGame && currentGame.status === 'in-progress';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-gray-50 p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-2xl mx-auto space-y-6 py-8">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="flex justify-center">
-            <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center shadow-lg">
-              <Trophy className="h-10 w-10 text-white" />
-            </div>
+        {/* Header with floating cards */}
+        <div className="text-center space-y-2 relative">
+          <div className="absolute -top-4 -left-4 opacity-60">
+            <FloatingCardDeck count={4} />
           </div>
-          <h1 className="text-4xl font-bold text-primary">Call Break</h1>
-          <p className="text-gray-600">Score Tracker</p>
+          <div className="absolute -top-2 -right-6 opacity-60">
+            <FloatingCardDeck count={3} />
+          </div>
+          <div className="flex justify-center relative z-10">
+            <AnimatedCard 
+              variant="game-card" 
+              className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg"
+            >
+              <Trophy className="h-10 w-10 text-red-600" />
+            </AnimatedCard>
+          </div>
+          <h1 className="text-4xl font-bold text-white relative z-10">Call Break</h1>
+          <p className="text-white/80 relative z-10">Score Tracker</p>
+          <div className="flex justify-center space-x-2 mt-2 relative z-10">
+            <CardSuits.Spades />
+            <CardSuits.Hearts />
+            <CardSuits.Diamonds />
+            <CardSuits.Clubs />
+          </div>
         </div>
 
         {/* Active Game Card */}
         {hasActiveGame && !showDeleteConfirm && (
-          <Card className="border-primary border-2">
+          <AnimatedCard variant="elevated" className="border-primary border-2">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Game in Progress</span>
@@ -121,31 +138,32 @@ export function HomeScreen() {
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3">
-                <Button 
+                <AnimatedButton 
                   onClick={handleResumeGame} 
                   className="w-full"
                   size="lg"
+                  variant="success"
+                  icon={<Play className="h-5 w-5" />}
                 >
-                  <Play className="h-5 w-5 mr-2" />
                   Resume Game
-                </Button>
-                <Button 
+                </AnimatedButton>
+                <AnimatedButton 
                   onClick={handleCancelGame}
-                  variant="outline"
+                  variant="danger"
                   className="w-full"
                   size="lg"
+                  icon={<Trash2 className="h-5 w-5" />}
                 >
-                  <Trash2 className="h-5 w-5 mr-2" />
                   Cancel Game
-                </Button>
+                </AnimatedButton>
               </div>
             </CardContent>
-          </Card>
+          </AnimatedCard>
         )}
 
         {/* Delete Confirmation */}
         {showDeleteConfirm && (
-          <Card className="border-red-300 border-2">
+          <AnimatedCard variant="floating" className="border-red-300 border-2">
             <CardHeader>
               <CardTitle className="text-red-600">Cancel Active Game?</CardTitle>
               <CardDescription>
@@ -154,54 +172,54 @@ export function HomeScreen() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <Button
+                <AnimatedButton
                   onClick={() => setShowDeleteConfirm(false)}
-                  variant="outline"
+                  variant="secondary"
                   className="w-full"
                 >
                   Keep Game
-                </Button>
-                <Button
+                </AnimatedButton>
+                <AnimatedButton
                   onClick={handleConfirmDelete}
-                  variant="destructive"
+                  variant="danger"
                   className="w-full"
                 >
                   Delete Game
-                </Button>
+                </AnimatedButton>
               </div>
             </CardContent>
-          </Card>
+          </AnimatedCard>
         )}
 
         {/* New Game Button */}
-        <Card>
+        <AnimatedCard variant="default">
           <CardContent className="pt-6">
-            <Button 
+            <AnimatedButton 
               onClick={handleNewGame} 
               className="w-full"
               size="lg"
-              variant={hasActiveGame ? "outline" : "default"}
+              variant={hasActiveGame ? "secondary" : "primary"}
+              icon={<Plus className="h-5 w-5" />}
             >
-              <Plus className="h-5 w-5 mr-2" />
               Start New Game
-            </Button>
+            </AnimatedButton>
           </CardContent>
-        </Card>
+        </AnimatedCard>
 
         {/* History Button */}
-        <Card>
+        <AnimatedCard variant="default">
           <CardContent className="pt-6">
-            <Button
+            <AnimatedButton
               onClick={() => setView('game-history')}
-              variant="outline"
+              variant="secondary"
               className="w-full"
               size="lg"
+              icon={<History className="h-5 w-5" />}
             >
-              <History className="h-5 w-5 mr-2" />
               View Game History
-            </Button>
+            </AnimatedButton>
           </CardContent>
-        </Card>
+        </AnimatedCard>
 
         {/* Info Section */}
         <div className="text-center text-sm text-gray-500 space-y-1">
