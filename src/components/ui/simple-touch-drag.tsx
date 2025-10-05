@@ -109,43 +109,36 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
 
   const handleGlobalMouseMove = (e: MouseEvent) => {
     const dragState = dragStateRef.current;
-    console.log('Mouse move called:', { 
-      isDragging: dragState.isDragging, 
-      draggedIndex: dragState.draggedIndex, 
-      clientY: e.clientY 
-    });
     
     if (!dragState.isDragging || dragState.draggedIndex === null) {
-      console.log('Mouse move early return - isDragging:', dragState.isDragging, 'draggedIndex:', dragState.draggedIndex);
       return;
     }
     
     const deltaY = e.clientY - dragState.touchStartY;
     const itemHeight = 80;
     
-    // Simple calculation: move to adjacent position based on drag distance
+    // Calculate target position based on drag distance
     let hoverIndex = dragState.draggedIndex;
+    const dragThreshold = 30; // Minimum distance to trigger reorder
     
-    if (deltaY > itemHeight) {
-      // Dragged down more than one item height
-      hoverIndex = Math.min(items.length - 1, dragState.draggedIndex + 1);
-    } else if (deltaY < -itemHeight) {
-      // Dragged up more than one item height  
-      hoverIndex = Math.max(0, dragState.draggedIndex - 1);
-    } else if (Math.abs(deltaY) > 20) {
-      // Small movement - determine direction
+    if (Math.abs(deltaY) > dragThreshold) {
+      // Calculate how many positions to move based on drag distance
+      const positionsToMove = Math.floor(Math.abs(deltaY) / (itemHeight * 0.7)); // More sensitive
+      
       if (deltaY > 0) {
-        hoverIndex = Math.min(items.length - 1, dragState.draggedIndex + 1);
+        // Dragging down
+        hoverIndex = Math.min(items.length - 1, dragState.draggedIndex + positionsToMove);
       } else {
-        hoverIndex = Math.max(0, dragState.draggedIndex - 1);
+        // Dragging up
+        hoverIndex = Math.max(0, dragState.draggedIndex - positionsToMove);
       }
     }
     
-    console.log('Mouse drag:', { deltaY, draggedIndex: dragState.draggedIndex, hoverIndex, itemHeight });
-    
-    // Update both state and ref
-    dragState.dragOverIndex = hoverIndex;
-    setDragOverIndex(hoverIndex);
+    // Only update if position actually changed
+    if (hoverIndex !== dragState.dragOverIndex) {
+      dragState.dragOverIndex = hoverIndex;
+      setDragOverIndex(hoverIndex);
+    }
   };
 
   const handleGlobalMouseUp = () => {
@@ -202,9 +195,10 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           animate={{
-            y: draggedIndex === index && isDragging ? (dragOverIndex || 0) * 80 : 0,
+            y: draggedIndex === index && isDragging ? 0 : 0, // Keep dragged item in place
             zIndex: draggedIndex === index ? 50 : 1,
             scale: draggedIndex === index && isDragging ? 1.05 : 1,
+            opacity: draggedIndex === index && isDragging ? 0.8 : 1,
           }}
           transition={{ 
             type: "spring", 
@@ -259,9 +253,10 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
             {dragOverIndex === index && draggedIndex !== index && (
               <motion.div
                 className="absolute inset-0 border-2 border-primary border-dashed rounded-lg bg-primary-10"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
               />
             )}
           </AnimatePresence>
