@@ -98,12 +98,6 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
           key={item.id}
           ref={index === 0 ? touchRef : null}
           className="relative"
-          onTouchStart={(e) => handleTouchStart(e, index)}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={(e) => handleMouseDown(e, index)}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           animate={{
@@ -118,11 +112,40 @@ export function SimpleTouchDrag<T extends { id: string }>({ items, onReorder, ch
               : 'border-gray-200 hover:border-gray-300 bg-white'
           }`}>
             <div className="flex items-center space-x-3">
-              {/* Drag handle */}
-              <div className="p-2 -m-2 touch-manipulation">
+              {/* Drag handle - only responds to drag gestures */}
+              <div 
+                className="p-2 -m-2 touch-manipulation cursor-grab active:cursor-grabbing"
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  handleTouchStart(e, index);
+                }}
+                onTouchMove={(e) => {
+                  e.stopPropagation();
+                  handleTouchMove(e);
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  handleTouchEnd();
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  handleMouseDown(e, index);
+                }}
+                onMouseMove={(e) => {
+                  e.stopPropagation();
+                  handleMouseMove(e);
+                }}
+                onMouseUp={(e) => {
+                  e.stopPropagation();
+                  handleMouseUp();
+                }}
+              >
                 <GripVertical className="h-5 w-5 text-gray-400" />
               </div>
-              {children(item, index)}
+              {/* Clickable area for dealer selection */}
+              <div className="flex-1">
+                {children(item, index)}
+              </div>
             </div>
           </div>
           

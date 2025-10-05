@@ -42,7 +42,7 @@ export function PlayerRolesSetup() {
         <CardHeader>
           <CardTitle className="text-center text-white">Player Roles</CardTitle>
           <CardDescription className="text-center text-white/80">
-            Drag to arrange seating • Tap to assign dealer
+            Drag grip icon to arrange seating • Tap player to assign dealer
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -51,7 +51,10 @@ export function PlayerRolesSetup() {
             onReorder={handleReorder}
           >
             {(player, index) => (
-              <div className="flex items-center justify-between w-full">
+              <div 
+                className="flex items-center justify-between w-full cursor-pointer"
+                onClick={() => setSelectedDealer(index)}
+              >
                 <div className="flex items-center space-x-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
                     selectedDealer === index ? 'bg-primary text-white' : 'bg-white text-gray-700'
@@ -75,7 +78,7 @@ export function PlayerRolesSetup() {
           
           <div className="bg-blue-50/90 backdrop-blur-sm border border-blue-200 rounded-lg p-3">
             <p className="text-xs text-blue-800">
-              💡 <strong>Tip:</strong> Drag players to match your physical seating arrangement (clockwise)
+              💡 <strong>Tip:</strong> Use grip icon (⋮⋮) to drag players into correct seating order (clockwise). Tap player name to make them dealer.
             </p>
           </div>
           
