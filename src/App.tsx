@@ -33,11 +33,16 @@ function App() {
   }
 
   const showHeader = [
+    'player-count',
+    'player-details', 
+    'player-roles',
+    'stakes-setup',
     'player-calls', 
     'player-results', 
     'round-summary', 
     'call-log', 
-    'game-complete'
+    'game-complete',
+    'game-history'
   ].includes(currentView);
 
   // Determine background variant based on current view

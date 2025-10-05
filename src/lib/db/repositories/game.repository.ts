@@ -42,6 +42,19 @@ export class GameRepository {
   }
 
   /**
+   * Get all games including in-progress (for history view)
+   */
+  async getAllGames(): Promise<Game[]> {
+    const games = await db.games.toArray();
+    return games.sort((a, b) => {
+      // Sort by completion date (most recent first), or creation date if not completed
+      const aDate = a.completedAt || a.createdAt;
+      const bDate = b.completedAt || b.createdAt;
+      return bDate.getTime() - aDate.getTime();
+    });
+  }
+
+  /**
    * Get all games
    */
   async getAll(): Promise<Game[]> {

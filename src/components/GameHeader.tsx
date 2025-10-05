@@ -30,7 +30,8 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
     }
   };
 
-  if (!currentGame || currentGame.status !== 'in-progress') return null;
+  // Always show header, but only show game-specific actions for in-progress games
+  const isInProgress = currentGame?.status === 'in-progress';
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200 safe-top">
@@ -48,12 +49,25 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
             </Button>
           )}
           <div className="min-w-0 flex-1">
-            <h2 className="font-semibold text-gray-900 fluid-text-base truncate">
-              Round {currentGame.currentRound} of 5
-            </h2>
-            <p className="fluid-text-xs text-gray-500">
-              {currentGame.players.length} players
-            </p>
+            {isInProgress ? (
+              <>
+                <h2 className="font-semibold text-gray-900 fluid-text-base truncate">
+                  Round {currentGame.currentRound} of 5
+                </h2>
+                <p className="fluid-text-xs text-gray-500">
+                  {currentGame.players.length} players
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="font-semibold text-gray-900 fluid-text-base truncate">
+                  Game Setup
+                </h2>
+                <p className="fluid-text-xs text-gray-500">
+                  Configure your game
+                </p>
+              </>
+            )}
           </div>
         </div>
         
@@ -80,12 +94,14 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
                 >
                   Go Home
                 </button>
-                <button
-                  onClick={handleCancelGame}
-                  className="w-full text-left px-4 py-3 text-base sm:text-sm text-red-600 hover:bg-red-50 transition-colors touch-active min-h-[48px] flex items-center"
-                >
-                  Cancel Game
-                </button>
+                {isInProgress && (
+                  <button
+                    onClick={handleCancelGame}
+                    className="w-full text-left px-4 py-3 text-base sm:text-sm text-red-600 hover:bg-red-50 transition-colors touch-active min-h-[48px] flex items-center"
+                  >
+                    Cancel Game
+                  </button>
+                )}
               </div>
             </>
           )}

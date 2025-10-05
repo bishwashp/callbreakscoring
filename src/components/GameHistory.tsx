@@ -5,10 +5,10 @@ import { useGameStore } from '@/store/gameStore';
 import { gameRepository } from '@/lib/db/repositories/game.repository';
 import type { Game } from '@/types/game.types';
 import { formatScore } from '@/lib/scoring/calculator';
-import { ArrowLeft, Calendar, Users, Trophy } from 'lucide-react';
+import { ArrowLeft, Calendar, Users, Trophy, Trash2, Play } from 'lucide-react';
 
 export function GameHistory() {
-  const { setView } = useGameStore();
+  const { setView, loadActiveGame } = useGameStore();
   const [games, setGames] = useState<Game[]>([]);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 
@@ -17,8 +17,24 @@ export function GameHistory() {
   }, []);
 
   const loadHistory = async () => {
-    const history = await gameRepository.getHistory();
-    setGames(history);
+    const allGames = await gameRepository.getAllGames();
+    setGames(allGames);
+  };
+
+  const handleDeleteGame = async (gameId: string, gameTitle: string) => {
+    if (confirm(`Are you sure you want to delete "${gameTitle}"? This action cannot be undone.`)) {
+      await gameRepository.delete(gameId);
+      await loadHistory(); // Reload the list
+    }
+  };
+
+  const handleContinueGame = async (game: Game) => {
+    if (game.status === 'in-progress') {
+      // Load this game as the active game
+      await gameRepository.save(game);
+      await loadActiveGame();
+      setView('home'); // Go to home where user can resume
+    }
   };
 
   const handleBack = () => {
@@ -202,7 +218,9 @@ export function GameHistory() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">Game History</h1>
-            <p className="text-sm text-gray-500">{games.length} completed games</p>
+            <p className="text-sm text-gray-500">
+              {games.filter(g => g.status === 'completed').length} completed, {games.filter(g => g.status === 'in-progress').length} in progress
+            </p>
           </div>
         </div>
 
@@ -218,24 +236,37 @@ export function GameHistory() {
           <div className="space-y-3">
             {games.map((game) => {
               const winner = getWinner(game);
+              const isCompleted = game.status === 'completed';
+              const gameTitle = `Game ${game.id.slice(-4)}`;
+              
               return (
                 <Card
                   key={game.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  className={`cursor-pointer hover:shadow-md transition-shadow ${
+                    isCompleted ? '' : 'border-blue-200 bg-blue-50'
+                  }`}
                   onClick={() => setSelectedGame(game)}
                 >
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-sm text-gray-500">
-                          <Calendar className="h-4 w-4" />
-                          <span>{formatDate(game.completedAt || game.createdAt)}</span>
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <Calendar className="h-4 w-4" />
+                            <span>{formatDate(game.completedAt || game.createdAt)}</span>
+                          </div>
+                          {!isCompleted && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              <Play className="h-3 w-3 mr-1" />
+                              In Progress
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-2 text-sm text-gray-600">
                           <Users className="h-4 w-4" />
                           <span>{game.players.map(p => p.name).join(', ')}</span>
                         </div>
-                        {winner && (
+                        {isCompleted && winner && (
                           <div className="flex items-center space-x-2">
                             <Trophy className="h-4 w-4 text-yellow-600" />
                             <span className="font-semibold text-yellow-700">{winner.playerName}</span>
@@ -244,10 +275,39 @@ export function GameHistory() {
                             </span>
                           </div>
                         )}
+                        {!isCompleted && (
+                          <div className="flex items-center space-x-2 text-sm text-blue-600">
+                            <span>Round {game.currentRound} of 5</span>
+                          </div>
+                        )}
                       </div>
-                      <Button variant="ghost" size="sm">
-                        View Details
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isCompleted) {
+                              setSelectedGame(game);
+                            } else {
+                              handleContinueGame(game);
+                            }
+                          }}
+                        >
+                          {isCompleted ? 'View Details' : 'Continue'}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteGame(game.id, gameTitle);
+                          }}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
