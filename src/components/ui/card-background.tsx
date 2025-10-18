@@ -13,14 +13,53 @@ export function CardBackground({
   className = ''
 }: CardBackgroundProps) {
   const variants = {
-    table: "bg-gradient-to-br from-green-800 via-green-700 to-green-900",
-    casino: "bg-gradient-to-br from-red-900 via-red-800 to-red-950",
-    elegant: "bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900",
+    table: "bg-gradient-to-br from-green-900 via-green-800 to-green-950",
+    casino: "bg-gradient-to-br from-red-950 via-red-900 to-black",
+    elegant: "bg-gradient-to-br from-gray-900 via-gray-800 to-black",
     minimal: "bg-gradient-to-br from-gray-100 via-gray-50 to-white"
   };
 
   return (
-    <div className={`min-h-screen ${variants[variant]} ${className}`}>
+    <div className={`min-h-screen ${variants[variant]} relative overflow-hidden ${className}`}>
+      {/* Card deck stack in background */}
+      {variant !== 'minimal' && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+          {/* Stacked deck effect */}
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-64 h-96 bg-gradient-to-br from-amber-100 via-white to-amber-50 rounded-2xl shadow-2xl border-4 border-amber-200"
+              style={{
+                transform: `rotate(${i * 2 - 7}deg) translateY(${i * 3}px) translateX(${i * 2}px)`,
+                zIndex: 8 - i,
+                boxShadow: `0 ${20 + i * 5}px ${40 + i * 10}px rgba(0,0,0,${0.4 - i * 0.03})`
+              }}
+            >
+              {/* Card back pattern */}
+              <div className="absolute inset-4 border-2 border-amber-300 rounded-xl">
+                <div 
+                  className="w-full h-full rounded-lg opacity-30"
+                  style={{
+                    backgroundImage: `repeating-linear-gradient(
+                      45deg,
+                      transparent,
+                      transparent 10px,
+                      rgba(217, 119, 6, 0.1) 10px,
+                      rgba(217, 119, 6, 0.1) 20px
+                    ), repeating-linear-gradient(
+                      -45deg,
+                      transparent,
+                      transparent 10px,
+                      rgba(217, 119, 6, 0.1) 10px,
+                      rgba(217, 119, 6, 0.1) 20px
+                    )`
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       {/* Animated background elements */}
       {variant !== 'minimal' && (
         <>

@@ -1,24 +1,50 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameStore } from '@/store/gameStore';
-import type { PlayerCall } from '@/types/game.types';
-import { Crown } from 'lucide-react';
+import type { PlayerCall, Player } from '@/types/game.types';
+import { Crown, ChevronRight, Check } from 'lucide-react';
+import { getCallingOrder, getCurrentCallerIndex } from '@/lib/game-logic/call-order';
+import { AnimatedCard } from '@/components/ui/animated-card';
+import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function CallEntry() {
   const { currentGame, getCurrentDealer, enterCalls, error, setHasUnsavedChanges } = useGameStore();
   const dealer = getCurrentDealer();
   const [calls, setCalls] = useState<Record<string, number>>({});
+  const [currentCall, setCurrentCall] = useState<string>('');
 
-  const handleCallChange = (playerId: string, value: string) => {
-    const numValue = parseInt(value) || 0;
-    const newCalls = { ...calls, [playerId]: numValue };
-    setCalls(newCalls);
+  if (!currentGame || !dealer) return null;
+
+  const callsMade = Object.keys(calls).length;
+  const callingOrder = getCallingOrder(dealer.seatingPosition, currentGame.players.length);
+  const currentCallerIndex = getCurrentCallerIndex(dealer.seatingPosition, currentGame.players.length, callsMade);
+  const currentPlayer = currentCallerIndex !== null ? currentGame.players[currentCallerIndex] : null;
+  
+  const allCallsComplete = callsMade === currentGame.players.length;
+
+  const handleNextCall = () => {
+    if (!currentPlayer) return;
     
-    // Mark as having unsaved changes if any call is entered
-    const hasAnyCall = Object.values(newCalls).some(call => call > 0);
-    setHasUnsavedChanges(hasAnyCall);
+    const callValue = parseInt(currentCall) || 0;
+    if (callValue < 1 || callValue > 13) return;
+
+    // Add call to the record
+    setCalls(prev => ({ ...prev, [currentPlayer.id]: callValue }));
+    setCurrentCall('');
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSubmit = () => {
+    if (!currentGame) return;
+
+    const playerCalls: PlayerCall[] = currentGame.players.map(player => ({
+      playerId: player.id,
+      call: calls[player.id],
+    }));
+
+    enterCalls(playerCalls);
+    setHasUnsavedChanges(false);
   };
 
   // Reset unsaved changes when component unmounts
@@ -28,86 +54,193 @@ export function CallEntry() {
     };
   }, [setHasUnsavedChanges]);
 
-  const handleSubmit = () => {
-    if (!currentGame) return;
+  const isValidCall = currentCall && parseInt(currentCall) >= 1 && parseInt(currentCall) <= 13;
 
-    const playerCalls: PlayerCall[] = currentGame.players.map(player => ({
-      playerId: player.id,
-      call: calls[player.id] || 1,
-    }));
-
-    enterCalls(playerCalls);
+  // Get player cards that slide in from the deck
+  const getPlayerCards = () => {
+    return callingOrder.map((playerIndex, orderIndex) => {
+      const player = currentGame.players[playerIndex];
+      const hasCalled = calls[player.id] !== undefined;
+      const isCurrentCaller = orderIndex === callsMade && !allCallsComplete;
+      const isDealer = player.seatingPosition === dealer.seatingPosition;
+      
+      return { player, hasCalled, isCurrentCaller, orderIndex, isDealer };
+    });
   };
 
-  const isValid = currentGame?.players.every(p => {
-    const call = calls[p.id];
-    return call >= 1 && call <= 13;
-  });
-
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto space-y-4">
-        <div className="bg-white rounded-lg shadow-sm p-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Round {currentGame?.currentRound}</h2>
-            <p className="text-sm text-gray-500">Enter player calls</p>
-          </div>
-          {dealer && (
-            <div className="flex items-center space-x-2 text-primary">
-              <Crown className="h-5 w-5 fill-current" />
-              <span className="text-sm font-semibold">{dealer.name} (Dealer)</span>
-            </div>
-          )}
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Player Calls</CardTitle>
-            <CardDescription>Round {currentGame?.currentRound}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {currentGame?.players.map((player) => (
-              <div key={player.id} className="flex items-center space-x-4">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                      player.seatingPosition === dealer?.seatingPosition
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-100'
-                    }`}>
-                      {player.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="font-medium">{player.name}</span>
-                  </div>
-                </div>
-                <div className="w-28 sm:w-24 flex-shrink-0">
-                  <Input
-                    type="number"
-                    min="1"
-                    max="13"
-                    placeholder="Call"
-                    value={calls[player.id] || ''}
-                    onChange={(e) => handleCallChange(player.id, e.target.value)}
-                    className="text-center text-xl font-bold sm:text-lg"
-                  />
-                </div>
+    <div className="min-h-screen p-4 flex items-center justify-center">
+      <div className="max-w-2xl w-full space-y-6">
+        {/* Main calling card */}
+        <AnimatedCard 
+          variant="elevated" 
+          className="bg-gradient-to-br from-amber-50 via-white to-amber-50 border-4 border-amber-200 shadow-2xl"
+        >
+          <div className="p-6 space-y-6">
+            {/* Header */}
+            <div className="text-center space-y-2">
+              <div className="flex items-center justify-center space-x-2 text-amber-700">
+                <Crown className="h-6 w-6 fill-current" />
+                <h2 className="text-3xl font-bold">Round {currentGame.currentRound}</h2>
               </div>
-            ))}
-            {error && (
-              <p className="text-sm text-red-500">{error}</p>
+              <p className="text-sm text-gray-600">
+                Dealer: <span className="font-semibold text-amber-700">{dealer.name}</span>
+              </p>
+            </div>
+
+            {/* Current player calling */}
+            {!allCallsComplete && currentPlayer && (
+              <motion.div
+                key={currentPlayer.id}
+                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                className="bg-gradient-to-br from-red-50 to-amber-50 rounded-2xl p-6 border-4 border-red-300 shadow-lg"
+              >
+                <div className="text-center space-y-4">
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center text-2xl font-bold shadow-lg">
+                      {currentPlayer.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="text-left">
+                      <p className="text-2xl font-bold text-gray-800">{currentPlayer.name}</p>
+                      <p className="text-sm text-gray-600">Your turn to call</p>
+                    </div>
+                  </div>
+
+                  {/* Large input field */}
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-1">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="13"
+                        placeholder="Enter call (1-13)"
+                        value={currentCall}
+                        onChange={(e) => setCurrentCall(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && isValidCall) {
+                            handleNextCall();
+                          }
+                        }}
+                        className="text-center text-4xl font-bold h-20 border-4 border-amber-300 focus:border-red-500 shadow-inner bg-white"
+                        autoFocus
+                      />
+                    </div>
+                    <AnimatePresence>
+                      {isValidCall && (
+                        <motion.div
+                          initial={{ scale: 0, rotate: -90 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          exit={{ scale: 0, rotate: 90 }}
+                        >
+                          <AnimatedButton
+                            onClick={handleNextCall}
+                            className="h-20 w-20 rounded-full text-2xl shadow-lg"
+                            variant="primary"
+                          >
+                            <ChevronRight className="h-8 w-8" />
+                          </AnimatedButton>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  
+                  <p className="text-xs text-gray-500">
+                    Call between 1 and 13 tricks
+                  </p>
+                </div>
+              </motion.div>
             )}
-            <p className="text-xs text-gray-500 text-center">
-              Each player must call between 1 and 13 tricks
-            </p>
-            <Button 
-              onClick={handleSubmit} 
-              className="w-full" 
-              disabled={!isValid}
-            >
-              Done
-            </Button>
-          </CardContent>
-        </Card>
+
+            {/* Completed calls - cards sliding in */}
+            <div className="space-y-3">
+              <AnimatePresence mode="popLayout">
+                {getPlayerCards().map(({ player, hasCalled, isCurrentCaller, orderIndex, isDealer }) => {
+                  if (!hasCalled && !isCurrentCaller) return null;
+                  
+                  return (
+                    <motion.div
+                      key={player.id}
+                      initial={{ x: 300, opacity: 0, rotateY: 45 }}
+                      animate={{ x: 0, opacity: 1, rotateY: 0 }}
+                      exit={{ x: -300, opacity: 0, rotateY: -45 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 25,
+                        delay: orderIndex * 0.1
+                      }}
+                      className={`rounded-xl p-4 border-2 flex items-center justify-between shadow-md ${
+                        hasCalled
+                          ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-300'
+                          : 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300 opacity-50'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${
+                          isDealer 
+                            ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white' 
+                            : 'bg-gradient-to-br from-gray-600 to-gray-800 text-white'
+                        }`}>
+                          {player.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-800 flex items-center space-x-2">
+                            <span>{player.name}</span>
+                            {isDealer && <Crown className="h-4 w-4 fill-amber-600" />}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {isCurrentCaller ? 'Calling...' : `Called: ${calls[player.id]}`}
+                          </p>
+                        </div>
+                      </div>
+                      {hasCalled && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="flex items-center space-x-2"
+                        >
+                          <div className="text-3xl font-bold text-green-700">
+                            {calls[player.id]}
+                          </div>
+                          <Check className="h-6 w-6 text-green-600" />
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+
+            {/* Submit button when all calls are complete */}
+            {allCallsComplete && (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <AnimatedButton
+                  onClick={handleSubmit}
+                  className="w-full h-16 text-xl shadow-xl"
+                  variant="success"
+                  icon={<Check className="h-6 w-6" />}
+                >
+                  Confirm All Calls
+                </AnimatedButton>
+              </motion.div>
+            )}
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center text-red-600 font-semibold bg-red-50 p-3 rounded-lg border border-red-200"
+              >
+                {error}
+              </motion.div>
+            )}
+          </div>
+        </AnimatedCard>
       </div>
     </div>
   );

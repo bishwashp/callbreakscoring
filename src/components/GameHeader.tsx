@@ -41,7 +41,7 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
   const showGameLog = (isInProgress || currentGame?.status === 'completed') && hasRoundData && currentView !== 'call-log';
 
   return (
-    <div className="bg-white shadow-sm border-b border-gray-200 safe-top">
+    <div className="bg-gradient-to-r from-amber-100 via-white to-amber-100 shadow-lg border-b-4 border-amber-300 safe-top card-depth">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
           {showHomeButton && (
@@ -105,17 +105,17 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
                 className="fixed inset-0 z-10" 
                 onClick={() => setShowMenu(false)}
               />
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+              <div className="absolute right-0 mt-2 w-48 bg-gradient-to-br from-amber-50 to-white rounded-xl shadow-2xl border-4 border-amber-300 py-1 z-20 card-depth">
                 <button
                   onClick={handleGoHome}
-                  className="w-full text-left px-4 py-3 text-base sm:text-sm hover:bg-gray-50 transition-colors touch-active min-h-[48px] flex items-center"
+                  className="w-full text-left px-4 py-3 text-base sm:text-sm font-semibold text-gray-800 hover:bg-amber-100 transition-colors touch-active min-h-[48px] flex items-center rounded-lg"
                 >
                   Go Home
                 </button>
                 {isInProgress && (
                   <button
                     onClick={handleCancelGame}
-                    className="w-full text-left px-4 py-3 text-base sm:text-sm text-red-600 hover:bg-red-50 transition-colors touch-active min-h-[48px] flex items-center"
+                    className="w-full text-left px-4 py-3 text-base sm:text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors touch-active min-h-[48px] flex items-center rounded-lg"
                   >
                     Cancel Game
                   </button>

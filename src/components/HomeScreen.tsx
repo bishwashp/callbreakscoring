@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameStore } from '@/store/gameStore';
 import { Play, Plus, Trash2, Users, History } from 'lucide-react';
@@ -66,34 +67,67 @@ export function HomeScreen() {
     <div className="min-h-screen p-4">
       <div className="max-w-2xl mx-auto space-y-6 py-8">
         {/* Header with floating cards */}
-        <div className="text-center space-y-2 relative">
+        <motion.div 
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 20 }}
+          className="text-center space-y-4 relative"
+        >
           <div className="absolute -top-4 -left-4 opacity-60">
             <FloatingCardDeck count={4} />
           </div>
           <div className="absolute -top-2 -right-6 opacity-60">
             <FloatingCardDeck count={3} />
           </div>
+          
+          {/* Decorative playing card header */}
           <div className="flex justify-center relative z-10">
-            <AnimatedCard 
-              variant="game-card" 
-              className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg"
+            <motion.div
+              animate={{ 
+                rotate: [0, 5, -5, 0],
+                y: [0, -10, 0]
+              }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="relative"
             >
-              <img 
-                src="/spade.png" 
-                alt="Ace of Spades" 
-                className="h-10 w-10"
-              />
-            </AnimatedCard>
+              <div className="w-32 h-44 bg-gradient-to-br from-amber-100 via-white to-amber-100 rounded-2xl border-4 border-amber-400 shadow-3xl flex flex-col items-center justify-center space-y-2 card-depth">
+                <div className="text-6xl">♠</div>
+                <div className="text-4xl font-bold text-gray-800">A</div>
+                <img 
+                  src="/spade.png" 
+                  alt="Ace of Spades" 
+                  className="h-8 w-8 opacity-50"
+                />
+              </div>
+            </motion.div>
           </div>
-          <h1 className="text-4xl font-bold text-white relative z-10">Call Break</h1>
-          <p className="text-white/80 relative z-10">Score Tracker</p>
-          <div className="flex justify-center space-x-2 mt-2 relative z-10">
-            <CardSuits.Spades />
-            <CardSuits.Hearts />
-            <CardSuits.Diamonds />
-            <CardSuits.Clubs />
+          
+          <div className="relative z-10 space-y-2">
+            <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 drop-shadow-lg">
+              Call Break
+            </h1>
+            <p className="text-amber-100 text-lg font-semibold tracking-wide">Score Tracker</p>
           </div>
-        </div>
+          
+          <div className="flex justify-center space-x-4 mt-4 relative z-10">
+            <motion.div whileHover={{ scale: 1.2, rotate: 360 }} transition={{ duration: 0.5 }}>
+              <div className="text-3xl">♠</div>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.2, rotate: 360 }} transition={{ duration: 0.5 }}>
+              <div className="text-3xl text-red-500">♥</div>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.2, rotate: 360 }} transition={{ duration: 0.5 }}>
+              <div className="text-3xl text-red-500">♦</div>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.2, rotate: 360 }} transition={{ duration: 0.5 }}>
+              <div className="text-3xl">♣</div>
+            </motion.div>
+          </div>
+        </motion.div>
 
         {/* Active Game Card */}
         {hasActiveGame && !showDeleteConfirm && (

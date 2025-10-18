@@ -28,15 +28,15 @@ export function AnimatedCard({
   ...props 
 }: AnimatedCardProps) {
   const variants = {
-    default: "bg-white border-2 border-gray-200 shadow-sm hover:shadow-md",
-    elevated: "bg-white border-2 border-gray-200 shadow-lg hover:shadow-xl",
-    floating: "bg-white border-2 border-gray-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1",
-    'game-card': "bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 shadow-lg hover:shadow-xl"
+    default: "bg-gradient-to-br from-white via-amber-50/30 to-white border-4 border-amber-200 shadow-lg hover:shadow-xl",
+    elevated: "bg-gradient-to-br from-white via-amber-50/50 to-white border-4 border-amber-300 shadow-2xl hover:shadow-3xl",
+    floating: "bg-gradient-to-br from-amber-50 via-white to-amber-50 border-4 border-amber-400 shadow-2xl hover:shadow-3xl transform hover:-translate-y-2",
+    'game-card': "bg-gradient-to-br from-red-50 via-white to-amber-50 border-4 border-red-300 shadow-2xl hover:shadow-3xl"
   };
 
-  const defaultWhileHover = variant === 'floating' ? { scale: 1.02, y: -4 } : { scale: 1.02 };
-  const defaultWhileTap = { scale: 0.98 };
-  const defaultTransition = { type: "spring", stiffness: 300, damping: 20 };
+  const defaultWhileHover = variant === 'floating' ? { scale: 1.02, y: -8 } : { scale: 1.01 };
+  const defaultWhileTap = { scale: 0.97 };
+  const defaultTransition = { type: "spring", stiffness: 260, damping: 22 };
 
   return (
     <motion.div
