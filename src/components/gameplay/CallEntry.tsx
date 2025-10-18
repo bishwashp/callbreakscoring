@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { useGameStore } from '@/store/gameStore';
-import type { PlayerCall, Player } from '@/types/game.types';
+import type { PlayerCall } from '@/types/game.types';
 import { Crown, ChevronRight, Check } from 'lucide-react';
 import { getCallingOrder, getCurrentCallerIndex } from '@/lib/game-logic/call-order';
 import { AnimatedCard } from '@/components/ui/animated-card';

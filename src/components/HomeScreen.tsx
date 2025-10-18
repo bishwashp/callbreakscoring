@@ -6,7 +6,7 @@ import { Play, Plus, Trash2, Users, History } from 'lucide-react';
 import { formatScore } from '@/lib/scoring/calculator';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { FloatingCardDeck, CardSuits } from '@/components/ui/animated-card';
+import { FloatingCardDeck } from '@/components/ui/animated-card';
 
 export function HomeScreen() {
   const { currentGame, newGame, setView, deleteActiveGame } = useGameStore();

@@ -9,19 +9,10 @@
 export function getCallingOrder(dealerIndex: number, playerCount: number): number[] {
   const order: number[] = [];
   
-  // Start from player after dealer (clockwise, which is +1)
-  let currentIndex = (dealerIndex + 1) % playerCount;
-  
-  // Go counter-clockwise from that position
-  // In an array, counter-clockwise means going backwards (-1), but we started at +1
-  // So we need to collect players: dealer+1, dealer, dealer-1, ..., dealer+2
-  
-  // Actually, let me reconsider: 
+  // Player after dealer calls first, then continues counter-clockwise until dealer calls last
   // If dealer is at position 2, and we have 4 players (0,1,2,3)
   // Player after dealer (clockwise) = 3
-  // Counter-clockwise from player 3: 3 -> 2 -> 1 -> 0
-  // But dealer (2) should call last
-  // So order is: 3 -> 0 -> 1 -> 2
+  // Order: 3 -> 0 -> 1 -> 2 (dealer calls last)
   
   // Start from next player after dealer
   for (let i = 0; i < playerCount; i++) {
