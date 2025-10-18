@@ -37,8 +37,8 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
 
   // Always show header, but only show game-specific actions for in-progress games
   const isInProgress = currentGame?.status === 'in-progress';
-  const hasCompletedRounds = currentGame?.rounds.some(r => r.status === 'completed') ?? false;
-  const showGameLog = (isInProgress || currentGame?.status === 'completed') && hasCompletedRounds && currentView !== 'call-log';
+  const hasRoundData = currentGame?.rounds.some(r => r.scores && r.scores.length > 0) ?? false;
+  const showGameLog = (isInProgress || currentGame?.status === 'completed') && hasRoundData && currentView !== 'call-log';
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200 safe-top">
