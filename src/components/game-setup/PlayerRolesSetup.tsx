@@ -30,8 +30,7 @@ export function PlayerRolesSetup() {
     return suits[index % 4];
   };
 
-  const [draggedCard, setDraggedCard] = useState<number | null>(null);
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [selectedForSwap, setSelectedForSwap] = useState<number | null>(null);
 
   // Define positions OUTSIDE map so all cards can reference them
   const positions = [
@@ -42,16 +41,35 @@ export function PlayerRolesSetup() {
     { x: '25%', y: '0%', translateX: '-50%', translateY: '0%' },     // Top-left (5th player)
   ];
 
-  const swapPlayers = (index1: number, index2: number) => {
-    const newPlayers = [...players];
-    [newPlayers[index1], newPlayers[index2]] = [newPlayers[index2], newPlayers[index1]];
-    setPlayers(newPlayers);
-    
-    // Update dealer index if dealer was involved in swap
-    if (selectedDealer === index1) {
-      setSelectedDealer(index2);
-    } else if (selectedDealer === index2) {
-      setSelectedDealer(index1);
+  const handleCardClick = (index: number) => {
+    if (selectedForSwap === null) {
+      // First click - select this card for swapping
+      setSelectedForSwap(index);
+    } else if (selectedForSwap === index) {
+      // Clicked same card - deselect
+      setSelectedForSwap(null);
+    } else {
+      // Second click - swap the two cards
+      const newPlayers = [...players];
+      [newPlayers[selectedForSwap], newPlayers[index]] = [newPlayers[index], newPlayers[selectedForSwap]];
+      setPlayers(newPlayers);
+      
+      // Update dealer index if dealer was involved in swap
+      if (selectedDealer === selectedForSwap) {
+        setSelectedDealer(index);
+      } else if (selectedDealer === index) {
+        setSelectedDealer(selectedForSwap);
+      }
+      
+      setSelectedForSwap(null);
+    }
+  };
+  
+  const handleDealerSelect = (index: number, e: React.MouseEvent) => {
+    // Right click or Ctrl+click to set dealer
+    if (e.ctrlKey || e.metaKey || e.button === 2) {
+      e.preventDefault();
+      setSelectedDealer(index);
     }
   };
 
@@ -85,10 +103,11 @@ export function PlayerRolesSetup() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-center"
+            className="text-center space-y-2"
           >
-            <h1 className="text-4xl font-bold text-gray-800">Who deals first?</h1>
-            <p className="text-base text-gray-600 mt-2">Tap a card to select dealer</p>
+            <h1 className="text-4xl font-bold text-gray-800">Arrange the table</h1>
+            <p className="text-base text-gray-600">Click cards to swap positions</p>
+            <p className="text-sm text-amber-700">Ctrl+Click to set dealer</p>
           </motion.div>
 
           {/* Square/Rectangular table with player cards */}
@@ -114,98 +133,53 @@ export function PlayerRolesSetup() {
                 const suitColor = ['♥', '♦'].includes(suit) ? 'text-red-600' : 'text-gray-800';
                 const pos = positions[index] || positions[0];
 
+                const isSelectedForSwap = selectedForSwap === index;
+                
                 return (
                   <motion.div
                     key={player.id}
-                    className="absolute cursor-grab active:cursor-grabbing"
+                    className="absolute cursor-pointer"
                     style={{
                       left: pos.x,
                       top: pos.y,
-                      zIndex: draggedCard === index ? 100 : isDealer ? 50 : hoveredCard === index ? 30 : 10
+                      zIndex: isSelectedForSwap ? 100 : isDealer ? 50 : 10
                     }}
                     initial={{ scale: 0, opacity: 0, x: pos.translateX, y: pos.translateY }}
                     animate={{ 
-                      scale: draggedCard === index ? 1.15 : hoveredCard === index ? 1.05 : 1,
+                      scale: isSelectedForSwap ? 1.1 : 1,
                       opacity: 1,
                       x: pos.translateX,
-                      y: pos.translateY,
-                      rotateZ: draggedCard === index ? 5 : 0
+                      y: isSelectedForSwap ? `calc(${pos.translateY} - 10px)` : pos.translateY
                     }}
                     transition={{ 
-                      delay: draggedCard === index ? 0 : index * 0.15, 
+                      delay: index * 0.15, 
                       type: 'spring',
                       stiffness: 300,
                       damping: 20
                     }}
-                    drag
-                    dragConstraints={{ left: -200, right: 200, top: -200, bottom: 200 }}
-                    dragElastic={0.1}
-                    dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
-                    onDragStart={() => setDraggedCard(index)}
-                    onDrag={(event, info) => {
-                      const draggedX = info.point.x;
-                      const draggedY = info.point.y;
-                      
-                      const cardElement = event.currentTarget as HTMLElement;
-                      const container = cardElement?.parentElement;
-                      if (!container) return;
-                      
-                      let foundHover: number | null = null;
-                      let minDistance = Infinity;
-                      
-                      // Get ALL player card elements from the container
-                      const allCards = Array.from(container.children) as HTMLElement[];
-                      
-                      allCards.forEach((otherCard, idx) => {
-                        if (idx === index || otherCard === cardElement) return;
-                        
-                        // Get the actual bounding rect of the other card
-                        const rect = otherCard.getBoundingClientRect();
-                        const otherCenterX = rect.left + rect.width / 2;
-                        const otherCenterY = rect.top + rect.height / 2;
-                        
-                        const distance = Math.sqrt(
-                          Math.pow(draggedX - otherCenterX, 2) + 
-                          Math.pow(draggedY - otherCenterY, 2)
-                        );
-                        
-                        if (distance < 100 && distance < minDistance) {
-                          minDistance = distance;
-                          foundHover = idx;
-                        }
-                      });
-                      
-                      if (foundHover !== hoveredCard) {
-                        setHoveredCard(foundHover);
-                      }
-                    }}
-                    onDragEnd={() => {
-                      if (hoveredCard !== null && draggedCard !== null) {
-                        // Swap the two players
-                        swapPlayers(draggedCard, hoveredCard);
-                      }
-                      setDraggedCard(null);
-                      setHoveredCard(null);
-                    }}
                   >
                     <motion.div
-                      whileHover={{ y: -4 }}
+                      whileHover={{ scale: 1.05, y: -8 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={(e) => {
-                        // Only select dealer if not dragging
-                        if (draggedCard === null) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setSelectedDealer(index);
+                        if (e.ctrlKey || e.metaKey) {
+                          handleDealerSelect(index, e);
+                        } else {
+                          handleCardClick(index);
                         }
+                      }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setSelectedDealer(index);
                       }}
                       className="relative"
                     >
-                      {/* Playing card with golden glow for dealer, blue glow when hovered during drag */}
+                      {/* Playing card with golden glow for dealer, purple glow when selected for swap */}
                       <div className={`w-28 h-36 rounded-xl shadow-2xl border-4 flex flex-col items-center justify-center space-y-1 transition-all ${
                         isDealer
                           ? 'bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-400 border-amber-600 gold-glow'
-                          : hoveredCard === index
-                          ? 'bg-gradient-to-br from-blue-100 via-blue-200 to-blue-100 border-blue-400 shadow-blue-500/50 shadow-2xl'
+                          : isSelectedForSwap
+                          ? 'bg-gradient-to-br from-purple-100 via-purple-200 to-purple-100 border-purple-400 shadow-purple-500/50 shadow-2xl'
                           : 'bg-gradient-to-br from-white via-gray-50 to-white border-gray-300'
                       }`}>
                         <div className={`text-5xl font-bold ${suitColor}`}>
