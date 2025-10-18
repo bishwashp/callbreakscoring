@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
 import { gameRepository } from '@/lib/db/repositories/game.repository';
 import type { Game } from '@/types/game.types';
 import { formatScore } from '@/lib/scoring/calculator';
-import { ArrowLeft, Calendar, Users, Trophy, Trash2, Play } from 'lucide-react';
+import { ArrowLeft, Calendar, Users, Trophy, Trash2, Play, History, Award } from 'lucide-react';
+import { AnimatedCard } from '@/components/ui/animated-card';
+import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function GameHistory() {
   const { setView, loadActiveGame } = useGameStore();
@@ -75,110 +76,130 @@ export function GameHistory() {
       .sort((a, b) => b.cumulativeScore - a.cumulativeScore) || [];
 
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-4xl mx-auto space-y-4">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" onClick={handleBack}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold">Game Details</h1>
-              <p className="text-sm text-gray-500">{formatDate(selectedGame.completedAt || selectedGame.createdAt)}</p>
+      <div className="min-h-screen p-4">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Header */}
+          <AnimatedCard variant="floating">
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center space-x-4">
+                <AnimatedButton
+                  variant="secondary"
+                  onClick={handleBack}
+                  className="w-12 h-12 rounded-full p-0"
+                >
+                  <ArrowLeft className="h-6 w-6" />
+                </AnimatedButton>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800">Game Details</h1>
+                  <p className="text-base text-gray-600 font-semibold">{formatDate(selectedGame.completedAt || selectedGame.createdAt)}</p>
+                </div>
+              </div>
             </div>
-          </div>
+          </AnimatedCard>
 
           {/* Winner Card */}
           {winner && (
-            <Card className="border-yellow-400 border-2 bg-yellow-50">
-              <CardContent className="pt-6">
+            <AnimatedCard variant="elevated" className="bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-400 border-4">
+              <div className="p-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Trophy className="h-8 w-8 text-yellow-600" />
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center shadow-xl">
+                      <Trophy className="h-10 w-10 text-white" />
+                    </div>
                     <div>
-                      <p className="text-sm text-gray-600">Winner</p>
-                      <p className="text-2xl font-bold text-yellow-700">{winner.playerName}</p>
+                      <p className="text-base text-amber-700 font-bold uppercase">Winner</p>
+                      <p className="text-3xl font-bold text-gray-800">{winner.playerName}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-green-600">
+                    <p className="text-5xl font-bold text-green-600">
                       {formatScore(winner.cumulativeScore)}
                     </p>
                     {selectedGame.stakes && (
-                      <p className="text-sm text-gray-600">
+                      <p className="text-base text-gray-600 font-semibold mt-1">
                         Won {selectedGame.stakes.currency}
                         {selectedGame.stakes.amounts.reduce((sum, amt) => sum + amt, 0).toFixed(2)}
                       </p>
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </AnimatedCard>
           )}
 
           {/* Standings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Final Standings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {standings.map((score, index) => (
-                <div
-                  key={score.playerId}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-lg font-bold text-gray-400">#{index + 1}</span>
-                    <span className="font-medium">{score.playerName}</span>
-                  </div>
-                  <span className={`text-lg font-bold ${
-                    score.cumulativeScore > 0 ? 'text-green-600' :
-                    score.cumulativeScore < 0 ? 'text-red-600' :
-                    'text-gray-600'
-                  }`}>
-                    {formatScore(score.cumulativeScore)}
-                  </span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <AnimatedCard variant="elevated">
+            <div className="p-6 space-y-4">
+              <div className="flex items-center space-x-2 pb-4 border-b-2 border-amber-200">
+                <Award className="h-6 w-6 text-amber-600" />
+                <h2 className="text-2xl font-bold text-gray-800">Final Standings</h2>
+              </div>
+              <div className="space-y-3">
+                {standings.map((score, index) => (
+                  <motion.div
+                    key={score.playerId}
+                    initial={{ x: -50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border-2 border-amber-200"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <span className="text-2xl font-bold text-amber-600">#{index + 1}</span>
+                      <span className="text-xl font-bold text-gray-800">{score.playerName}</span>
+                    </div>
+                    <span className={`text-2xl font-bold ${
+                      score.cumulativeScore > 0 ? 'text-green-600' :
+                      score.cumulativeScore < 0 ? 'text-red-600' :
+                      'text-gray-600'
+                    }`}>
+                      {formatScore(score.cumulativeScore)}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </AnimatedCard>
 
-          {/* Round by Round */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Round Details</CardTitle>
-            </CardHeader>
-            <CardContent>
+          {/* Round by Round - similar to CallLog */}
+          <AnimatedCard variant="elevated">
+            <div className="p-6 space-y-4">
+              <div className="flex items-center space-x-2 pb-4 border-b-2 border-amber-200">
+                <History className="h-6 w-6 text-amber-600" />
+                <h2 className="text-2xl font-bold text-gray-800">Round by Round</h2>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Player</th>
+                    <tr className="bg-gradient-to-r from-amber-100 to-amber-50 border-b-4 border-amber-300">
+                      <th className="text-left p-4 font-bold text-gray-800 text-lg">Player</th>
                       {selectedGame.rounds.map((round) => (
-                        <th key={round.roundNumber} className="text-center p-2">R{round.roundNumber}</th>
+                        <th key={round.roundNumber} className="text-center p-4 font-bold text-gray-800 text-base">
+                          R{round.roundNumber}
+                        </th>
                       ))}
-                      <th className="text-center p-2 bg-primary-50">Total</th>
+                      <th className="text-center p-4 bg-green-100 font-bold text-gray-800 text-lg">Total</th>
                     </tr>
                   </thead>
                   <tbody>
                     {selectedGame.players.map((player) => {
                       const finalScore = standings.find(s => s.playerId === player.id);
                       return (
-                        <tr key={player.id} className="border-b">
-                          <td className="p-2 font-medium">{player.name}</td>
+                        <tr key={player.id} className="border-b-2 border-amber-100 hover:bg-amber-50/50">
+                          <td className="p-4 font-bold text-gray-800 text-lg">{player.name}</td>
                           {selectedGame.rounds.map((round) => {
                             const score = round.scores.find(s => s.playerId === player.id);
                             return (
-                              <td key={round.roundNumber} className="text-center p-2">
+                              <td key={round.roundNumber} className="text-center p-4">
                                 {score ? (
                                   <div>
-                                    <div className={`font-semibold ${
+                                    <div className={`font-bold text-xl ${
                                       score.roundScore > 0 ? 'text-green-600' :
                                       score.roundScore < 0 ? 'text-red-600' :
                                       'text-gray-600'
                                     }`}>
                                       {formatScore(score.cumulativeScore)}
                                     </div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-sm text-gray-500 font-semibold">
                                       {score.call}/{score.result}
                                     </div>
                                   </div>
@@ -186,8 +207,8 @@ export function GameHistory() {
                               </td>
                             );
                           })}
-                          <td className="text-center p-2 bg-primary-50">
-                            <span className={`font-bold ${
+                          <td className="text-center p-4 bg-green-50">
+                            <span className={`font-bold text-2xl ${
                               (finalScore?.cumulativeScore || 0) > 0 ? 'text-green-600' :
                               (finalScore?.cumulativeScore || 0) < 0 ? 'text-red-600' :
                               'text-gray-600'
@@ -201,8 +222,8 @@ export function GameHistory() {
                   </tbody>
                 </table>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </AnimatedCard>
         </div>
       </div>
     );
@@ -210,107 +231,121 @@ export function GameHistory() {
 
   // Show games list
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto space-y-4">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={handleBack}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Game History</h1>
-            <p className="text-sm text-gray-500">
-              {games.filter(g => g.status === 'completed').length} completed, {games.filter(g => g.status === 'in-progress').length} in progress
-            </p>
+    <div className="min-h-screen p-4">
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* Header */}
+        <AnimatedCard variant="floating">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center space-x-4">
+              <AnimatedButton
+                variant="secondary"
+                onClick={handleBack}
+                className="w-12 h-12 rounded-full p-0"
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </AnimatedButton>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800">Game History</h1>
+                <p className="text-base text-gray-600 font-semibold">
+                  {games.filter(g => g.status === 'completed').length} completed • {games.filter(g => g.status === 'in-progress').length} in progress
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        </AnimatedCard>
 
         {games.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6 text-center text-gray-500">
-              <Trophy className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-              <p>No completed games yet</p>
-              <p className="text-sm">Finish a game to see it here!</p>
-            </CardContent>
-          </Card>
+          <AnimatedCard variant="elevated">
+            <div className="p-12 text-center space-y-4">
+              <Trophy className="h-20 w-20 mx-auto text-amber-300" />
+              <p className="text-2xl font-bold text-gray-600">No Games Yet</p>
+              <p className="text-base text-gray-500">Complete your first game to see it here!</p>
+            </div>
+          </AnimatedCard>
         ) : (
-          <div className="space-y-3">
-            {games.map((game) => {
+          <div className="space-y-4">
+            {games.map((game, index) => {
               const winner = getWinner(game);
               const isCompleted = game.status === 'completed';
               const gameTitle = `Game ${game.id.slice(-4)}`;
               
               return (
-                <Card
+                <motion.div
                   key={game.id}
-                  className={`cursor-pointer hover:shadow-md transition-shadow ${
-                    isCompleted ? '' : 'border-blue-200 bg-blue-50'
-                  }`}
-                  onClick={() => setSelectedGame(game)}
+                  initial={{ x: -100, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: index * 0.1 }}
                 >
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-2 flex-1">
-                        <div className="flex items-center space-x-2">
-                          <div className="flex items-center space-x-2 text-sm text-gray-500">
-                            <Calendar className="h-4 w-4" />
-                            <span>{formatDate(game.completedAt || game.createdAt)}</span>
+                  <AnimatedCard
+                    variant="elevated"
+                    className={`cursor-pointer ${isCompleted ? '' : 'border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50'}`}
+                    onClick={() => setSelectedGame(game)}
+                  >
+                    <div className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-3 flex-1">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2 text-base text-gray-600 font-semibold">
+                              <Calendar className="h-5 w-5" />
+                              <span>{formatDate(game.completedAt || game.createdAt)}</span>
+                            </div>
+                            {!isCompleted && (
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-blue-500 text-white">
+                                <Play className="h-4 w-4 mr-1" />
+                                In Progress
+                              </span>
+                            )}
                           </div>
+                          <div className="flex items-center space-x-2 text-base text-gray-700 font-semibold">
+                            <Users className="h-5 w-5" />
+                            <span>{game.players.map(p => p.name).join(', ')}</span>
+                          </div>
+                          {isCompleted && winner && (
+                            <div className="flex items-center space-x-2">
+                              <Trophy className="h-5 w-5 text-yellow-600 fill-yellow-600" />
+                              <span className="font-bold text-yellow-700 text-lg">{winner.playerName}</span>
+                              <span className="text-base text-gray-600 font-semibold">
+                                ({formatScore(winner.cumulativeScore)})
+                              </span>
+                            </div>
+                          )}
                           {!isCompleted && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              <Play className="h-3 w-3 mr-1" />
-                              In Progress
-                            </span>
+                            <div className="flex items-center space-x-2 text-base text-blue-600 font-bold">
+                              <span>Round {game.currentRound} of 5</span>
+                            </div>
                           )}
                         </div>
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <Users className="h-4 w-4" />
-                          <span>{game.players.map(p => p.name).join(', ')}</span>
+                        <div className="flex flex-col space-y-2">
+                          <AnimatedButton
+                            variant={isCompleted ? "primary" : "success"}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (isCompleted) {
+                                setSelectedGame(game);
+                              } else {
+                                handleContinueGame(game);
+                              }
+                            }}
+                            className="px-6 h-12 text-base"
+                          >
+                            {isCompleted ? 'View Details' : 'Continue'}
+                          </AnimatedButton>
+                          <AnimatedButton
+                            variant="danger"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteGame(game.id, gameTitle);
+                            }}
+                            className="px-6 h-12 text-base"
+                            icon={<Trash2 className="h-4 w-4" />}
+                          >
+                            Delete
+                          </AnimatedButton>
                         </div>
-                        {isCompleted && winner && (
-                          <div className="flex items-center space-x-2">
-                            <Trophy className="h-4 w-4 text-yellow-600" />
-                            <span className="font-semibold text-yellow-700">{winner.playerName}</span>
-                            <span className="text-sm text-gray-500">
-                              ({formatScore(winner.cumulativeScore)})
-                            </span>
-                          </div>
-                        )}
-                        {!isCompleted && (
-                          <div className="flex items-center space-x-2 text-sm text-blue-600">
-                            <span>Round {game.currentRound} of 5</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (isCompleted) {
-                              setSelectedGame(game);
-                            } else {
-                              handleContinueGame(game);
-                            }
-                          }}
-                        >
-                          {isCompleted ? 'View Details' : 'Continue'}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteGame(game.id, gameTitle);
-                          }}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </AnimatedCard>
+                </motion.div>
               );
             })}
           </div>
