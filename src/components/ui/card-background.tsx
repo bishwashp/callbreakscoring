@@ -13,97 +13,81 @@ export function CardBackground({
   className = ''
 }: CardBackgroundProps) {
   const variants = {
-    table: "bg-gradient-to-br from-green-900 via-green-800 to-green-950",
+    table: "bg-gradient-to-br from-green-800 via-green-900 to-green-950",
     casino: "bg-gradient-to-br from-red-950 via-red-900 to-black",
-    elegant: "bg-gradient-to-br from-gray-900 via-gray-800 to-black",
+    elegant: "bg-gradient-to-br from-green-800 via-green-900 to-green-950",
     minimal: "bg-gradient-to-br from-gray-100 via-gray-50 to-white"
   };
 
+  // Card suit symbols with colors
+  const suits = [
+    { symbol: '♠', color: 'text-white/30' },
+    { symbol: '♥', color: 'text-red-400/30' },
+    { symbol: '♦', color: 'text-red-400/30' },
+    { symbol: '♣', color: 'text-white/30' }
+  ];
+
   return (
     <div className={`min-h-screen ${variants[variant]} relative overflow-hidden ${className}`}>
-      {/* Felt texture overlay */}
+      {/* Poker felt texture */}
       {variant !== 'minimal' && (
-        <>
-          <div 
-            className="absolute inset-0 opacity-20"
-            style={{
-              backgroundImage: `
-                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 1px, transparent 1px),
-                radial-gradient(circle at 80% 70%, rgba(0,0,0,0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '15px 15px'
-            }}
-          />
-          
-          {/* Subtle corner ornaments */}
-          <div className="absolute top-4 left-4 text-amber-500/20 text-6xl pointer-events-none">♠</div>
-          <div className="absolute top-4 right-4 text-red-500/20 text-6xl pointer-events-none">♥</div>
-          <div className="absolute bottom-4 left-4 text-red-500/20 text-6xl pointer-events-none">♦</div>
-          <div className="absolute bottom-4 right-4 text-amber-500/20 text-6xl pointer-events-none">♣</div>
-        </>
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 25% 25%, rgba(255,255,255,0.05) 1px, transparent 1px),
+              radial-gradient(circle at 75% 75%, rgba(0,0,0,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '20px 20px'
+          }}
+        />
+      )}
+      
+      {/* Animated falling suits */}
+      {variant !== 'minimal' && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => {
+            const suit = suits[i % 4];
+            const randomDelay = Math.random() * 5;
+            const randomX = Math.random() * 100;
+            const randomDuration = 8 + Math.random() * 6;
+            const randomSize = 2 + Math.random() * 2; // rem units
+            
+            return (
+              <motion.div
+                key={i}
+                className={`absolute ${suit.color} pointer-events-none`}
+                style={{
+                  left: `${randomX}%`,
+                  top: '-10%',
+                  fontSize: `${randomSize}rem`,
+                  fontWeight: 'bold'
+                }}
+                animate={{
+                  y: ['0vh', '110vh'],
+                  rotate: [0, 360],
+                  opacity: [0, 1, 1, 0]
+                }}
+                transition={{
+                  duration: randomDuration,
+                  repeat: Infinity,
+                  delay: randomDelay,
+                  ease: "linear",
+                  opacity: {
+                    times: [0, 0.1, 0.9, 1]
+                  }
+                }}
+              >
+                {suit.symbol}
+              </motion.div>
+            );
+          })}
+        </div>
       )}
       {/* Animated background elements */}
       {variant !== 'minimal' && (
         <>
-          {/* Floating cards */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(12)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-8 h-12 bg-white/10 border border-white/20 rounded-lg shadow-lg"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: [0, -20, 0],
-                  rotate: [0, 5, -5, 0],
-                  opacity: [0.1, 0.3, 0.1]
-                }}
-                transition={{
-                  duration: 4 + Math.random() * 4,
-                  repeat: Infinity,
-                  delay: Math.random() * 4
-                }}
-              />
-            ))}
-          </div>
-          
-          {/* Subtle grid pattern */}
-          <div 
-            className="absolute inset-0 opacity-5"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '50px 50px'
-            }}
-          />
-          
-          {/* Light rays */}
-          <div className="absolute inset-0">
-            {[...Array(3)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-full bg-gradient-to-b from-white/20 via-white/5 to-transparent"
-                style={{
-                  left: `${20 + i * 30}%`,
-                  transform: `rotate(${15 + i * 10}deg)`,
-                  transformOrigin: 'bottom'
-                }}
-                animate={{
-                  opacity: [0, 0.3, 0],
-                  scaleY: [0, 1, 0]
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  delay: i * 1
-                }}
-              />
-            ))}
-          </div>
+
         </>
       )}
       
