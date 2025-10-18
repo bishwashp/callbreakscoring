@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Minus, Plus, Users, ChevronRight } from 'lucide-react';
+import { Minus, Plus, Users, ChevronRight, Home } from 'lucide-react';
 import { useGameStore } from '@/store/gameStore';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function PlayerCountSelector() {
   const [playerCount, setPlayerCount] = useState(4);
-  const { setPlayerCount: setStorePlayerCount, goToNextView } = useGameStore();
+  const { setPlayerCount: setStorePlayerCount, goToNextView, setView } = useGameStore();
 
   const handleIncrement = () => {
     if (playerCount < 5) {
@@ -29,6 +29,21 @@ export function PlayerCountSelector() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-6">
+        {/* Home button - top left */}
+        <motion.div
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="flex justify-start"
+        >
+          <AnimatedButton
+            variant="secondary"
+            onClick={() => setView('home')}
+            className="w-14 h-14 rounded-full p-0 shadow-xl"
+          >
+            <Home className="h-6 w-6" />
+          </AnimatedButton>
+        </motion.div>
+
         {/* Header Card */}
         <AnimatedCard variant="floating" className="text-center">
           <motion.div

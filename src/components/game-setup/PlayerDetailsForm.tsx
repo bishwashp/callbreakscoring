@@ -3,12 +3,12 @@ import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { useGameStore } from '@/store/gameStore';
 import { validatePlayerNames } from '@/lib/scoring/validator';
-import { Users, ChevronRight, ChevronLeft, User } from 'lucide-react';
+import { Users, ChevronRight, ChevronLeft, User, Home } from 'lucide-react';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function PlayerDetailsForm() {
-  const { currentGame, setPlayers, goToNextView, goToPreviousView } = useGameStore();
+  const { currentGame, setPlayers, goToNextView, goToPreviousView, setView } = useGameStore();
   const [playerNames, setPlayerNames] = useState<string[]>(
     currentGame?.players.map(p => p.name) || []
   );
@@ -42,6 +42,28 @@ export function PlayerDetailsForm() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-lg w-full space-y-6">
+        {/* Navigation buttons */}
+        <motion.div
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="flex justify-between"
+        >
+          <AnimatedButton
+            variant="secondary"
+            onClick={goToPreviousView}
+            className="w-14 h-14 rounded-full p-0 shadow-xl"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </AnimatedButton>
+          <AnimatedButton
+            variant="secondary"
+            onClick={() => setView('home')}
+            className="w-14 h-14 rounded-full p-0 shadow-xl"
+          >
+            <Home className="h-6 w-6" />
+          </AnimatedButton>
+        </motion.div>
+
         {/* Header Card */}
         <AnimatedCard variant="floating" className="text-center">
           <motion.div
@@ -105,24 +127,14 @@ export function PlayerDetailsForm() {
               </p>
             </div>
 
-            <div className="flex space-x-4 pt-4">
-              <AnimatedButton
-                variant="secondary"
-                onClick={goToPreviousView}
-                className="flex-1 h-14 text-lg"
-                icon={<ChevronLeft className="h-5 w-5" />}
-              >
-                Back
-              </AnimatedButton>
-              <AnimatedButton
-                onClick={handleSubmit}
-                className="flex-1 h-14 text-lg"
-                variant="primary"
-                icon={<ChevronRight className="h-5 w-5" />}
-              >
-                Continue
-              </AnimatedButton>
-            </div>
+            <AnimatedButton
+              onClick={handleSubmit}
+              className="w-full h-16 text-xl shadow-xl"
+              variant="primary"
+              icon={<ChevronRight className="h-6 w-6" />}
+            >
+              Continue
+            </AnimatedButton>
           </div>
         </AnimatedCard>
       </div>

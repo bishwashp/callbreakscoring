@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { useGameStore } from '@/store/gameStore';
-import { DollarSign, ChevronLeft, Play, SkipForward, TrendingUp } from 'lucide-react';
+import { DollarSign, ChevronLeft, Play, SkipForward, TrendingUp, Home } from 'lucide-react';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function StakesSetup() {
-  const { currentGame, setStakes, startGame, goToPreviousView } = useGameStore();
+  const { currentGame, setStakes, startGame, goToPreviousView, setView } = useGameStore();
   const playerCount = currentGame?.players.length || 4;
   
   // Default currency and amounts (one less than player count, as winner doesn't pay)
@@ -40,6 +40,28 @@ export function StakesSetup() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-lg w-full space-y-6">
+        {/* Navigation buttons */}
+        <motion.div
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="flex justify-between"
+        >
+          <AnimatedButton
+            variant="secondary"
+            onClick={goToPreviousView}
+            className="w-14 h-14 rounded-full p-0 shadow-xl"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </AnimatedButton>
+          <AnimatedButton
+            variant="secondary"
+            onClick={() => setView('home')}
+            className="w-14 h-14 rounded-full p-0 shadow-xl"
+          >
+            <Home className="h-6 w-6" />
+          </AnimatedButton>
+        </motion.div>
+
         {/* Header Card */}
         <AnimatedCard variant="floating" className="text-center">
           <motion.div
@@ -158,24 +180,14 @@ export function StakesSetup() {
               >
                 Start Game
               </AnimatedButton>
-              <div className="flex space-x-3">
-                <AnimatedButton
-                  variant="secondary"
-                  onClick={goToPreviousView}
-                  className="flex-1 h-14 text-lg"
-                  icon={<ChevronLeft className="h-5 w-5" />}
-                >
-                  Back
-                </AnimatedButton>
-                <AnimatedButton
-                  variant="secondary"
-                  onClick={handleSkip}
-                  className="flex-1 h-14 text-lg"
-                  icon={<SkipForward className="h-5 w-5" />}
-                >
-                  Skip Stakes
-                </AnimatedButton>
-              </div>
+              <AnimatedButton
+                variant="secondary"
+                onClick={handleSkip}
+                className="w-full h-14 text-lg"
+                icon={<SkipForward className="h-5 w-5" />}
+              >
+                Skip Stakes
+              </AnimatedButton>
             </div>
           </div>
         </AnimatedCard>

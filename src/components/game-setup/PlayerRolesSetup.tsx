@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameStore } from '@/store/gameStore';
-import { Crown, Shuffle, Users } from 'lucide-react';
+import { Crown, Shuffle, Users, ChevronLeft, ChevronRight, Home } from 'lucide-react';
 import { SimpleTouchDrag } from '@/components/ui/simple-touch-drag';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -46,6 +46,28 @@ export function PlayerRolesSetup() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-2xl w-full space-y-4">
+        {/* Navigation buttons */}
+        <motion.div
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="flex justify-between"
+        >
+          <AnimatedButton
+            variant="secondary"
+            onClick={goToPreviousView}
+            className="w-14 h-14 rounded-full p-0 shadow-xl"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </AnimatedButton>
+          <AnimatedButton
+            variant="secondary"
+            onClick={() => setView('home')}
+            className="w-14 h-14 rounded-full p-0 shadow-xl"
+          >
+            <Home className="h-6 w-6" />
+          </AnimatedButton>
+        </motion.div>
+
         {/* Decorative card table */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -215,23 +237,14 @@ export function PlayerRolesSetup() {
                 </p>
               </div>
               
-              <div className="flex space-x-3">
-                <AnimatedButton
-                  onClick={goToPreviousView}
-                  variant="secondary"
-                  className="flex-1"
-                >
-                  Back
-                </AnimatedButton>
-                <AnimatedButton
-                  onClick={handleSubmit}
-                  variant="primary"
-                  className="flex-1"
-                  icon={<Crown className="h-5 w-5" />}
-                >
-                  Continue
-                </AnimatedButton>
-              </div>
+              <AnimatedButton
+              onClick={handleSubmit}
+              variant="primary"
+              className="w-full h-16 text-xl shadow-xl"
+              icon={<ChevronRight className="h-6 w-6" />}
+            >
+              Continue
+            </AnimatedButton>
             </CardContent>
           </AnimatedCard>
         </motion.div>

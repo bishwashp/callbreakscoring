@@ -32,11 +32,8 @@ function App() {
     );
   }
 
+  // Only show header for gameplay and history views, not setup
   const showHeader = [
-    'player-count',
-    'player-details', 
-    'player-roles',
-    'stakes-setup',
     'player-calls', 
     'player-results', 
     'round-summary', 
