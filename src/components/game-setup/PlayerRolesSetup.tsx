@@ -86,7 +86,7 @@ export function PlayerRolesSetup() {
           </motion.div>
 
           {/* Circular table with player cards */}
-          <div className="relative mx-auto w-full max-w-lg py-8">
+          <div className="relative mx-auto w-full max-w-2xl py-4">
             {/* Green felt table */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0">
               <motion.div 
@@ -101,7 +101,7 @@ export function PlayerRolesSetup() {
             </div>
 
             {/* Player cards arranged in circle */}
-            <div className="relative h-96">
+            <div className="relative h-[500px] w-full overflow-visible">
               {players.map((player, index) => {
                 const angle = (index / players.length) * 360 - 90; // Start from top
                 const radius = 140;
