@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameStore } from '@/store/gameStore';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, ChevronLeft, Play, SkipForward, TrendingUp } from 'lucide-react';
+import { AnimatedCard } from '@/components/ui/animated-card';
+import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function StakesSetup() {
   const { currentGame, setStakes, startGame, goToPreviousView } = useGameStore();
@@ -14,7 +15,6 @@ export function StakesSetup() {
   const [amounts, setAmounts] = useState<number[]>(
     Array(playerCount - 1).fill(0).map((_, i) => (playerCount - 1 - i) * 5)
   );
-  const [skipStakes, setSkipStakes] = useState(false);
 
   const handleAmountChange = (index: number, value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -24,121 +24,162 @@ export function StakesSetup() {
   };
 
   const handleContinue = () => {
-    if (!skipStakes) {
-      setStakes({
-        currency,
-        amounts,
-      });
-    }
+    setStakes({
+      currency,
+      amounts,
+    });
     startGame();
   };
 
   const handleSkip = () => {
-    setSkipStakes(true);
     startGame();
   };
 
   const totalPot = amounts.reduce((sum, amt) => sum + amt, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <DollarSign className="h-6 w-6 text-primary" />
-            <span>Stakes Setup</span>
-          </CardTitle>
-          <CardDescription>
-            Define how much each rank pays (optional)
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Currency Selector */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Currency Symbol</label>
-            <div className="flex space-x-2">
-              {['$', '€', '£', 'Rs', '¥'].map((sym) => (
-                <button
-                  key={sym}
-                  onClick={() => setCurrency(sym)}
-                  className={`px-4 py-2 rounded-md border-2 transition-all ${
-                    currency === sym
-                      ? 'border-primary bg-primary text-white'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  {sym}
-                </button>
-              ))}
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="max-w-lg w-full space-y-6">
+        {/* Header Card */}
+        <AnimatedCard variant="floating" className="text-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="space-y-3"
+          >
+            <div className="flex justify-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-xl">
+                <DollarSign className="h-10 w-10 text-white" />
+              </div>
             </div>
-          </div>
+            <h1 className="text-4xl font-bold text-gray-800">Stakes Setup</h1>
+            <p className="text-base text-gray-600 font-semibold">
+              Define payouts by rank (optional)
+            </p>
+          </motion.div>
+        </AnimatedCard>
 
-          {/* Payment Amounts */}
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-gray-700">Payment by Rank</label>
-            {amounts.map((amount, index) => {
-              const position = playerCount - index; // 4th place, 3rd place, 2nd place
-              return (
-                <div key={index} className="flex items-center space-x-3">
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-500 mb-1">
-                      {position === playerCount ? 'Lowest scorer' : 
-                       position === playerCount - 1 ? '2nd lowest' :
-                       position === playerCount - 2 ? '3rd lowest' : 
-                       `${position}th place`}
+        {/* Stakes Form */}
+        <AnimatedCard variant="elevated">
+          <div className="p-6 space-y-6">
+            {/* Currency Selector */}
+            <div className="space-y-3">
+              <label className="text-lg font-bold text-gray-700 uppercase tracking-wide">Currency</label>
+              <div className="flex space-x-3">
+                {['$', '€', '£', 'Rs', '¥'].map((sym) => (
+                  <motion.button
+                    key={sym}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setCurrency(sym)}
+                    className={`flex-1 h-14 rounded-xl border-4 font-bold text-xl transition-all shadow-md ${
+                      currency === sym
+                        ? 'border-green-500 bg-gradient-to-br from-green-400 to-emerald-600 text-white'
+                        : 'border-amber-300 bg-white text-gray-700 hover:border-amber-400'
+                    }`}
+                  >
+                    {sym}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Payment Amounts */}
+            <div className="space-y-4">
+              <label className="text-lg font-bold text-gray-700 uppercase tracking-wide">Payment by Rank</label>
+              {amounts.map((amount, index) => {
+                const position = playerCount - index; // 4th place, 3rd place, 2nd place
+                const positionLabels: Record<number, string> = {
+                  [playerCount]: 'Lowest Scorer',
+                  [playerCount - 1]: '2nd Lowest',
+                  [playerCount - 2]: '3rd Lowest',
+                };
+                
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ x: -100, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-xl border-2 border-red-200"
+                  >
+                    <p className="text-sm font-bold text-red-700 mb-2 uppercase tracking-wide">
+                      {positionLabels[position] || `${position}th Place`}
                     </p>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg font-semibold text-gray-600">{currency}</span>
+                    <div className="flex items-center space-x-3">
+                      <span className="text-3xl font-bold text-gray-800">{currency}</span>
                       <Input
                         type="number"
                         min="0"
                         step="0.01"
                         value={amount || ''}
                         onChange={(e) => handleAmountChange(index, e.target.value)}
-                        className="text-lg font-semibold"
+                        className="h-16 text-3xl font-bold text-center border-4 border-amber-400 focus:border-green-500 shadow-inner rounded-xl"
                         placeholder="0"
                       />
                     </div>
-                  </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Total Pot */}
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-gradient-to-r from-green-50 to-emerald-50 border-4 border-green-400 rounded-2xl p-6 shadow-xl"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-6 w-6 text-green-700" />
+                  <span className="text-lg font-bold text-green-800">Winner Receives:</span>
                 </div>
-              );
-            })}
-          </div>
+                <span className="text-4xl font-bold text-green-700">
+                  {currency}{totalPot.toFixed(2)}
+                </span>
+              </div>
+            </motion.div>
 
-          {/* Total Pot */}
-          <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-green-800">Winner receives:</span>
-              <span className="text-2xl font-bold text-green-700">
-                {currency}{totalPot.toFixed(2)}
-              </span>
+            {/* Example */}
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+              <p className="text-sm text-blue-800 font-semibold">
+                <strong>📖 How it works:</strong> At game end, lowest scorer pays {currency}{amounts[0]}, 
+                second lowest pays {currency}{amounts[1] || 0}, etc. Winner collects all!
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="space-y-3 pt-2">
+              <AnimatedButton
+                onClick={handleContinue}
+                className="w-full h-16 text-xl shadow-xl"
+                variant="success"
+                icon={<Play className="h-6 w-6" />}
+              >
+                Start Game
+              </AnimatedButton>
+              <div className="flex space-x-3">
+                <AnimatedButton
+                  variant="secondary"
+                  onClick={goToPreviousView}
+                  className="flex-1 h-14 text-lg"
+                  icon={<ChevronLeft className="h-5 w-5" />}
+                >
+                  Back
+                </AnimatedButton>
+                <AnimatedButton
+                  variant="secondary"
+                  onClick={handleSkip}
+                  className="flex-1 h-14 text-lg"
+                  icon={<SkipForward className="h-5 w-5" />}
+                >
+                  Skip Stakes
+                </AnimatedButton>
+              </div>
             </div>
           </div>
-
-          {/* Example */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-xs text-blue-800">
-              <strong>Example:</strong> At game end, lowest scorer pays {currency}{amounts[0]}, 
-              second lowest pays {currency}{amounts[1] || 0}, etc. Winner collects all!
-            </p>
-          </div>
-
-          {/* Buttons */}
-          <div className="space-y-2">
-            <Button onClick={handleContinue} className="w-full" size="lg">
-              Start Game
-            </Button>
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={goToPreviousView} className="flex-1">
-                Back
-              </Button>
-              <Button variant="ghost" onClick={handleSkip} className="flex-1">
-                Skip Stakes
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </AnimatedCard>
+      </div>
     </div>
   );
 }
