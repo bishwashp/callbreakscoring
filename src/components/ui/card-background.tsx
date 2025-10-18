@@ -21,44 +21,26 @@ export function CardBackground({
 
   return (
     <div className={`min-h-screen ${variants[variant]} relative overflow-hidden ${className}`}>
-      {/* Card deck stack in background */}
+      {/* Felt texture overlay */}
       {variant !== 'minimal' && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-          {/* Stacked deck effect */}
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-64 h-96 bg-gradient-to-br from-amber-100 via-white to-amber-50 rounded-2xl shadow-2xl border-4 border-amber-200"
-              style={{
-                transform: `rotate(${i * 2 - 7}deg) translateY(${i * 3}px) translateX(${i * 2}px)`,
-                zIndex: 8 - i,
-                boxShadow: `0 ${20 + i * 5}px ${40 + i * 10}px rgba(0,0,0,${0.4 - i * 0.03})`
-              }}
-            >
-              {/* Card back pattern */}
-              <div className="absolute inset-4 border-2 border-amber-300 rounded-xl">
-                <div 
-                  className="w-full h-full rounded-lg opacity-30"
-                  style={{
-                    backgroundImage: `repeating-linear-gradient(
-                      45deg,
-                      transparent,
-                      transparent 10px,
-                      rgba(217, 119, 6, 0.1) 10px,
-                      rgba(217, 119, 6, 0.1) 20px
-                    ), repeating-linear-gradient(
-                      -45deg,
-                      transparent,
-                      transparent 10px,
-                      rgba(217, 119, 6, 0.1) 10px,
-                      rgba(217, 119, 6, 0.1) 20px
-                    )`
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+        <>
+          <div 
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: `
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 70%, rgba(0,0,0,0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: '15px 15px'
+            }}
+          />
+          
+          {/* Subtle corner ornaments */}
+          <div className="absolute top-4 left-4 text-amber-500/20 text-6xl pointer-events-none">♠</div>
+          <div className="absolute top-4 right-4 text-red-500/20 text-6xl pointer-events-none">♥</div>
+          <div className="absolute bottom-4 left-4 text-red-500/20 text-6xl pointer-events-none">♦</div>
+          <div className="absolute bottom-4 right-4 text-amber-500/20 text-6xl pointer-events-none">♣</div>
+        </>
       )}
       {/* Animated background elements */}
       {variant !== 'minimal' && (

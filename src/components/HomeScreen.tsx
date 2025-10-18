@@ -80,58 +80,75 @@ export function HomeScreen() {
             <FloatingCardDeck count={3} />
           </div>
           
-          {/* Decorative playing card header */}
+          {/* Luxurious card spread header */}
           <div className="flex justify-center relative z-10">
-            <motion.div
-              animate={{ 
-                rotate: [0, 5, -5, 0],
-                y: [0, -10, 0]
-              }}
-              transition={{ 
-                duration: 4, 
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="relative"
+            <div className="relative w-80 h-52">
+              {/* Fan of cards */}
+              {[
+                { suit: '♠', color: 'text-gray-800', rank: 'A', rotate: -20, x: -40 },
+                { suit: '♥', color: 'text-red-600', rank: 'K', rotate: -10, x: -20 },
+                { suit: '♦', color: 'text-red-600', rank: 'Q', rotate: 0, x: 0 },
+                { suit: '♣', color: 'text-gray-800', rank: 'J', rotate: 10, x: 20 },
+                { suit: '♠', color: 'text-gray-800', rank: '10', rotate: 20, x: 40 }
+              ].map((card, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ y: -100, opacity: 0, rotate: card.rotate - 180 }}
+                  animate={{ 
+                    y: 0, 
+                    opacity: 1,
+                    rotate: card.rotate,
+                    x: card.x
+                  }}
+                  transition={{
+                    delay: index * 0.1,
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 15
+                  }}
+                  whileHover={{ 
+                    y: -20, 
+                    rotate: 0,
+                    scale: 1.1,
+                    zIndex: 50,
+                    transition: { type: "spring", stiffness: 300, damping: 20 }
+                  }}
+                  className="absolute left-1/2 top-0 -translate-x-1/2 cursor-pointer"
+                  style={{ zIndex: index }}
+                >
+                  <div className="w-28 h-40 bg-gradient-to-br from-amber-50 via-white to-amber-50 rounded-2xl border-4 border-amber-400 shadow-2xl card-depth flex flex-col items-center justify-between py-3">
+                    <div className={`text-5xl font-bold ${card.color}`}>{card.suit}</div>
+                    <div className="text-4xl font-bold text-gray-800">{card.rank}</div>
+                    <div className={`text-5xl font-bold ${card.color} transform rotate-180`}>{card.suit}</div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="relative z-10 space-y-3 mt-6">
+            <motion.h1 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 drop-shadow-2xl"
             >
-              <div className="w-32 h-44 bg-gradient-to-br from-amber-100 via-white to-amber-100 rounded-2xl border-4 border-amber-400 shadow-3xl flex flex-col items-center justify-center space-y-2 card-depth">
-                <div className="text-6xl">♠</div>
-                <div className="text-4xl font-bold text-gray-800">A</div>
-                <img 
-                  src="/spade.png" 
-                  alt="Ace of Spades" 
-                  className="h-8 w-8 opacity-50"
-                />
-              </div>
-            </motion.div>
-          </div>
-          
-          <div className="relative z-10 space-y-2">
-            <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 drop-shadow-lg">
               Call Break
-            </h1>
-            <p className="text-amber-100 text-lg font-semibold tracking-wide">Score Tracker</p>
-          </div>
-          
-          <div className="flex justify-center space-x-4 mt-4 relative z-10">
-            <motion.div whileHover={{ scale: 1.2, rotate: 360 }} transition={{ duration: 0.5 }}>
-              <div className="text-3xl">♠</div>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.2, rotate: 360 }} transition={{ duration: 0.5 }}>
-              <div className="text-3xl text-red-500">♥</div>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.2, rotate: 360 }} transition={{ duration: 0.5 }}>
-              <div className="text-3xl text-red-500">♦</div>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.2, rotate: 360 }} transition={{ duration: 0.5 }}>
-              <div className="text-3xl">♣</div>
+            </motion.h1>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="inline-block bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-2 rounded-full border-2 border-amber-300 shadow-lg"
+            >
+              <p className="text-white text-lg font-bold tracking-wider">SCORE TRACKER</p>
             </motion.div>
           </div>
         </motion.div>
 
         {/* Active Game Card */}
         {hasActiveGame && !showDeleteConfirm && (
-          <AnimatedCard variant="elevated" className="border-primary border-2">
+          <AnimatedCard variant="elevated" className="border-amber-400 border-4">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Game in Progress</span>
