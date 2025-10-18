@@ -31,6 +31,20 @@ export function PlayerRolesSetup() {
   };
 
   const [draggedCard, setDraggedCard] = useState<number | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
+  const swapPlayers = (index1: number, index2: number) => {
+    const newPlayers = [...players];
+    [newPlayers[index1], newPlayers[index2]] = [newPlayers[index2], newPlayers[index1]];
+    setPlayers(newPlayers);
+    
+    // Update dealer index if dealer was involved in swap
+    if (selectedDealer === index1) {
+      setSelectedDealer(index2);
+    } else if (selectedDealer === index2) {
+      setSelectedDealer(index1);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -105,40 +119,87 @@ export function PlayerRolesSetup() {
                 return (
                   <motion.div
                     key={player.id}
-                    className="absolute cursor-pointer"
+                    className="absolute cursor-grab active:cursor-grabbing"
                     style={{
                       left: pos.x,
                       top: pos.y,
-                      zIndex: isDealer ? 50 : draggedCard === index ? 40 : 10
+                      zIndex: draggedCard === index ? 100 : isDealer ? 50 : hoveredCard === index ? 30 : 10
                     }}
                     initial={{ scale: 0, opacity: 0, x: pos.translateX, y: pos.translateY }}
                     animate={{ 
-                      scale: draggedCard === index ? 1.1 : 1, 
+                      scale: draggedCard === index ? 1.15 : hoveredCard === index ? 1.05 : 1,
                       opacity: 1,
                       x: pos.translateX,
-                      y: pos.translateY
+                      y: pos.translateY,
+                      rotateZ: draggedCard === index ? 5 : 0
                     }}
-                    transition={{ delay: index * 0.15, type: 'spring' }}
+                    transition={{ 
+                      delay: draggedCard === index ? 0 : index * 0.15, 
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 20
+                    }}
                     drag
-                    dragConstraints={{ left: -20, right: 20, top: -20, bottom: 20 }}
-                    dragElastic={0.3}
+                    dragConstraints={{ left: -200, right: 200, top: -200, bottom: 200 }}
+                    dragElastic={0.1}
+                    dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
                     onDragStart={() => setDraggedCard(index)}
-                    onDragEnd={() => setDraggedCard(null)}
+                    onDrag={(event) => {
+                      // Calculate which card we're hovering over based on drag position
+                      const cardElement = event.currentTarget as HTMLElement;
+                      const rect = cardElement.getBoundingClientRect();
+                      const centerX = rect.left + rect.width / 2;
+                      const centerY = rect.top + rect.height / 2;
+                      
+                      // Check each player position to see if we're hovering over them
+                      let foundHover = null;
+                      players.forEach((_, idx) => {
+                        if (idx === index) return; // Skip self
+                        
+                        const otherPos = positions[idx] || positions[0];
+                        const container = cardElement.parentElement;
+                        if (!container) return;
+                        
+                        const containerRect = container.getBoundingClientRect();
+                        const otherX = containerRect.left + (containerRect.width * parseFloat(otherPos.x) / 100);
+                        const otherY = containerRect.top + (containerRect.height * parseFloat(otherPos.y) / 100);
+                        
+                        const distance = Math.sqrt(Math.pow(centerX - otherX, 2) + Math.pow(centerY - otherY, 2));
+                        
+                        if (distance < 80) { // Within 80px = hovering
+                          foundHover = idx;
+                        }
+                      });
+                      
+                      setHoveredCard(foundHover);
+                    }}
+                    onDragEnd={() => {
+                      if (hoveredCard !== null && draggedCard !== null) {
+                        // Swap the two players
+                        swapPlayers(draggedCard, hoveredCard);
+                      }
+                      setDraggedCard(null);
+                      setHoveredCard(null);
+                    }}
                   >
                     <motion.div
-                      whileHover={{ scale: 1.05, y: -8 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ y: -4 }}
                       onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setSelectedDealer(index);
+                        // Only select dealer if not dragging
+                        if (draggedCard === null) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setSelectedDealer(index);
+                        }
                       }}
                       className="relative"
                     >
-                      {/* Playing card with golden glow for dealer */}
+                      {/* Playing card with golden glow for dealer, blue glow when hovered during drag */}
                       <div className={`w-28 h-36 rounded-xl shadow-2xl border-4 flex flex-col items-center justify-center space-y-1 transition-all ${
                         isDealer
                           ? 'bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-400 border-amber-600 gold-glow'
+                          : hoveredCard === index
+                          ? 'bg-gradient-to-br from-blue-100 via-blue-200 to-blue-100 border-blue-400 shadow-blue-500/50 shadow-2xl'
                           : 'bg-gradient-to-br from-white via-gray-50 to-white border-gray-300'
                       }`}>
                         <div className={`text-5xl font-bold ${suitColor}`}>
