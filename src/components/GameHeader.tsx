@@ -76,6 +76,17 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
               </>
             )}
           </div>
+          {showGameLog && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleViewGameLog}
+              title="View Game Log"
+              className="flex-shrink-0 ml-2"
+            >
+              <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6" />
+            </Button>
+          )}
         </div>
         
         <div className="relative flex-shrink-0">
@@ -101,15 +112,6 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
                 >
                   Go Home
                 </button>
-                {showGameLog && (
-                  <button
-                    onClick={handleViewGameLog}
-                    className="w-full text-left px-4 py-3 text-base sm:text-sm hover:bg-gray-50 transition-colors touch-active min-h-[48px] flex items-center gap-2"
-                  >
-                    <ClipboardList className="h-4 w-4" />
-                    View Game Log
-                  </button>
-                )}
                 {isInProgress && (
                   <button
                     onClick={handleCancelGame}
