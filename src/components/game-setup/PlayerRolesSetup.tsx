@@ -143,11 +143,9 @@ export function PlayerRolesSetup() {
                     dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
                     onDragStart={() => setDraggedCard(index)}
                     onDrag={(event, info) => {
-                      // Use drag info point instead of getBoundingClientRect
                       const draggedX = info.point.x;
                       const draggedY = info.point.y;
                       
-                      // Get all card elements
                       const cardElement = event.currentTarget as HTMLElement;
                       const container = cardElement?.parentElement;
                       if (!container) return;
@@ -155,30 +153,23 @@ export function PlayerRolesSetup() {
                       let foundHover: number | null = null;
                       let minDistance = Infinity;
                       
-                      // Check each player's position
-                      players.forEach((_, idx) => {
-                        if (idx === index) return;
+                      // Get ALL player card elements from the container
+                      const allCards = Array.from(container.children) as HTMLElement[];
+                      
+                      allCards.forEach((otherCard, idx) => {
+                        if (idx === index || otherCard === cardElement) return;
                         
-                        const pos = positions[idx];
-                        const containerRect = container.getBoundingClientRect();
-                        
-                        // Calculate center of other card
-                        let otherX = containerRect.left;
-                        let otherY = containerRect.top;
-                        
-                        if (pos.x.includes('%')) {
-                          otherX += (containerRect.width * parseFloat(pos.x)) / 100;
-                        }
-                        if (pos.y.includes('%')) {
-                          otherY += (containerRect.height * parseFloat(pos.y)) / 100;
-                        }
+                        // Get the actual bounding rect of the other card
+                        const rect = otherCard.getBoundingClientRect();
+                        const otherCenterX = rect.left + rect.width / 2;
+                        const otherCenterY = rect.top + rect.height / 2;
                         
                         const distance = Math.sqrt(
-                          Math.pow(draggedX - otherX, 2) + 
-                          Math.pow(draggedY - otherY, 2)
+                          Math.pow(draggedX - otherCenterX, 2) + 
+                          Math.pow(draggedY - otherCenterY, 2)
                         );
                         
-                        if (distance < 120 && distance < minDistance) {
+                        if (distance < 100 && distance < minDistance) {
                           minDistance = distance;
                           foundHover = idx;
                         }
