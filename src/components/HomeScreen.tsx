@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameStore } from '@/store/gameStore';
-import { Play, Plus, Trash2, Trophy, Users, History } from 'lucide-react';
+import { Play, Plus, Trash2, Users, History } from 'lucide-react';
 import { formatScore } from '@/lib/scoring/calculator';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -78,7 +78,11 @@ export function HomeScreen() {
               variant="game-card" 
               className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg"
             >
-              <Trophy className="h-10 w-10 text-red-600" />
+              <img 
+                src="/spade.png" 
+                alt="Ace of Spades" 
+                className="h-10 w-10"
+              />
             </AnimatedCard>
           </div>
           <h1 className="text-4xl font-bold text-white relative z-10">Call Break</h1>

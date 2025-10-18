@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useGameStore } from '@/store/gameStore';
-import { Home, Menu } from 'lucide-react';
+import { Home, Menu, ClipboardList } from 'lucide-react';
 import { useState } from 'react';
 
 interface GameHeaderProps {
@@ -8,7 +8,7 @@ interface GameHeaderProps {
 }
 
 export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
-  const { currentGame, goHome, deleteActiveGame, hasUnsavedChanges, setHasUnsavedChanges } = useGameStore();
+  const { currentGame, goHome, deleteActiveGame, hasUnsavedChanges, setHasUnsavedChanges, setView, currentView } = useGameStore();
   const [showMenu, setShowMenu] = useState(false);
 
   const handleGoHome = () => {
@@ -30,8 +30,15 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
     }
   };
 
+  const handleViewGameLog = () => {
+    setView('call-log');
+    setShowMenu(false);
+  };
+
   // Always show header, but only show game-specific actions for in-progress games
   const isInProgress = currentGame?.status === 'in-progress';
+  const hasCompletedRounds = currentGame?.rounds.some(r => r.status === 'completed') ?? false;
+  const showGameLog = (isInProgress || currentGame?.status === 'completed') && hasCompletedRounds && currentView !== 'call-log';
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200 safe-top">
@@ -94,6 +101,15 @@ export function GameHeader({ showHomeButton = true }: GameHeaderProps) {
                 >
                   Go Home
                 </button>
+                {showGameLog && (
+                  <button
+                    onClick={handleViewGameLog}
+                    className="w-full text-left px-4 py-3 text-base sm:text-sm hover:bg-gray-50 transition-colors touch-active min-h-[48px] flex items-center gap-2"
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                    View Game Log
+                  </button>
+                )}
                 {isInProgress && (
                   <button
                     onClick={handleCancelGame}

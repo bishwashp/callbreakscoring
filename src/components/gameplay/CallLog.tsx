@@ -12,7 +12,15 @@ export function CallLog() {
     if (currentGame?.status === 'completed') {
       setView('game-complete');
     } else {
-      setView('round-summary');
+      // Intelligently go back based on game state
+      const currentRound = currentGame?.rounds[currentGame.currentRound - 1];
+      if (currentRound?.status === 'completed') {
+        setView('round-summary');
+      } else if (currentRound?.status === 'calls-entered') {
+        setView('player-results');
+      } else {
+        setView('player-calls');
+      }
     }
   };
 
