@@ -18,23 +18,6 @@ export function PlayerRolesSetup() {
     }
   }, [currentGame?.players]);
 
-  const handleCardDrag = (fromIndex: number, toIndex: number) => {
-    const newPlayers = [...players];
-    const [movedPlayer] = newPlayers.splice(fromIndex, 1);
-    newPlayers.splice(toIndex, 0, movedPlayer);
-    
-    setPlayers(newPlayers);
-    
-    // Update dealer index if the dealer was moved
-    if (selectedDealer === fromIndex) {
-      setSelectedDealer(toIndex);
-    } else if (fromIndex < selectedDealer && toIndex >= selectedDealer) {
-      setSelectedDealer(selectedDealer - 1);
-    } else if (fromIndex > selectedDealer && toIndex <= selectedDealer) {
-      setSelectedDealer(selectedDealer + 1);
-    }
-  };
-
   const handleSubmit = () => {
     updateSeatingOrder(players);
     setInitialDealer(selectedDealer);
@@ -85,12 +68,12 @@ export function PlayerRolesSetup() {
             <p className="text-base text-gray-600 mt-2">Tap a card to select dealer</p>
           </motion.div>
 
-          {/* Circular table with player cards */}
-          <div className="relative mx-auto w-full max-w-2xl py-4">
-            {/* Green felt table */}
+          {/* Square/Rectangular table with player cards */}
+          <div className="relative mx-auto w-full max-w-3xl py-8">
+            {/* Green felt table - rectangular */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0">
               <motion.div 
-                className="w-48 h-48 rounded-full bg-gradient-to-br from-green-700 via-green-800 to-green-900 shadow-2xl"
+                className="w-80 h-64 rounded-3xl bg-gradient-to-br from-green-700 via-green-800 to-green-900 shadow-2xl"
                 style={{
                   boxShadow: 'inset 0 0 60px rgba(0,0,0,0.3), 0 20px 40px rgba(0,0,0,0.4)'
                 }}
@@ -100,50 +83,47 @@ export function PlayerRolesSetup() {
               />
             </div>
 
-            {/* Player cards arranged in circle */}
-            <div className="relative h-[500px] w-full overflow-visible">
+            {/* Player cards arranged around rectangular table */}
+            <div className="relative h-[400px] w-full">
               {players.map((player, index) => {
-                const angle = (index / players.length) * 360 - 90; // Start from top
-                const radius = 140;
-                const x = Math.cos((angle * Math.PI) / 180) * radius;
-                const y = Math.sin((angle * Math.PI) / 180) * radius;
                 const isDealer = selectedDealer === index;
                 const suit = getCardSuitForPosition(index);
                 const suitColor = ['♥', '♦'].includes(suit) ? 'text-red-600' : 'text-gray-800';
+                
+                // Position cards around the rectangular table
+                // Top, Right, Bottom, Left arrangement
+                const positions = [
+                  { x: '50%', y: '0%', translateX: '-50%', translateY: '0%' },     // Top
+                  { x: '100%', y: '50%', translateX: '-100%', translateY: '-50%' }, // Right
+                  { x: '50%', y: '100%', translateX: '-50%', translateY: '-100%' }, // Bottom
+                  { x: '0%', y: '50%', translateX: '0%', translateY: '-50%' },     // Left
+                  { x: '25%', y: '0%', translateX: '-50%', translateY: '0%' },     // Top-left (5th player)
+                ];
+                
+                const pos = positions[index] || positions[0];
 
                 return (
                   <motion.div
                     key={player.id}
-                    className="absolute cursor-pointer touch-none"
+                    className="absolute cursor-pointer"
                     style={{
-                      left: '50%',
-                      top: '50%',
-                      transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+                      left: pos.x,
+                      top: pos.y,
                       zIndex: isDealer ? 50 : draggedCard === index ? 40 : 10
                     }}
-                    initial={{ scale: 0, opacity: 0 }}
+                    initial={{ scale: 0, opacity: 0, x: pos.translateX, y: pos.translateY }}
                     animate={{ 
                       scale: draggedCard === index ? 1.1 : 1, 
                       opacity: 1,
-                      x: 0,
-                      y: 0
+                      x: pos.translateX,
+                      y: pos.translateY
                     }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.15, type: 'spring' }}
                     drag
-                    dragConstraints={{ left: -50, right: 50, top: -50, bottom: 50 }}
-                    dragElastic={0.2}
+                    dragConstraints={{ left: -20, right: 20, top: -20, bottom: 20 }}
+                    dragElastic={0.3}
                     onDragStart={() => setDraggedCard(index)}
-                    onDragEnd={(_, info) => {
-                      setDraggedCard(null);
-                      // Calculate which position the card was dragged to
-                      const dragAngle = Math.atan2(info.point.y - window.innerHeight / 2, info.point.x - window.innerWidth / 2) * 180 / Math.PI;
-                      const normalizedAngle = (dragAngle + 90 + 360) % 360;
-                      const targetIndex = Math.round((normalizedAngle / 360) * players.length) % players.length;
-                      
-                      if (targetIndex !== index) {
-                        handleCardDrag(index, targetIndex);
-                      }
-                    }}
+                    onDragEnd={() => setDraggedCard(null)}
                   >
                     <motion.div
                       whileHover={{ scale: 1.05, y: -8 }}
@@ -156,7 +136,7 @@ export function PlayerRolesSetup() {
                       className="relative"
                     >
                       {/* Playing card with golden glow for dealer */}
-                      <div className={`w-24 h-32 rounded-xl shadow-2xl border-4 flex flex-col items-center justify-center space-y-1 transition-all ${
+                      <div className={`w-28 h-36 rounded-xl shadow-2xl border-4 flex flex-col items-center justify-center space-y-1 transition-all ${
                         isDealer
                           ? 'bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-400 border-amber-600 gold-glow'
                           : 'bg-gradient-to-br from-white via-gray-50 to-white border-gray-300'
@@ -168,7 +148,7 @@ export function PlayerRolesSetup() {
                           {player.name.split(' ')[0]}
                         </div>
                         <div className="text-xs font-semibold text-gray-600 bg-white/50 px-2 py-1 rounded">
-                          {index + 1}
+                          Seat {index + 1}
                         </div>
                       </div>
                       
