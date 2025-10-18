@@ -149,25 +149,32 @@ export function PlayerRolesSetup() {
                       const centerX = rect.left + rect.width / 2;
                       const centerY = rect.top + rect.height / 2;
                       
-                      // Check each player position to see if we're hovering over them
-                      let foundHover = null;
-                      players.forEach((_, idx) => {
-                        if (idx === index) return; // Skip self
-                        
-                        const otherPos = positions[idx] || positions[0];
-                        const container = cardElement.parentElement;
-                        if (!container) return;
-                        
-                        const containerRect = container.getBoundingClientRect();
-                        const otherX = containerRect.left + (containerRect.width * parseFloat(otherPos.x) / 100);
-                        const otherY = containerRect.top + (containerRect.height * parseFloat(otherPos.y) / 100);
-                        
-                        const distance = Math.sqrt(Math.pow(centerX - otherX, 2) + Math.pow(centerY - otherY, 2));
-                        
-                        if (distance < 80) { // Within 80px = hovering
-                          foundHover = idx;
-                        }
-                      });
+                      // Get all card elements and check proximity
+                      let foundHover: number | null = null;
+                      let minDistance = Infinity;
+                      
+                      const container = cardElement.parentElement;
+                      if (container) {
+                        // Find all other card divs
+                        const allCards = container.querySelectorAll(':scope > div');
+                        allCards.forEach((otherCard, idx) => {
+                          if (otherCard === cardElement || idx === index) return;
+                          
+                          const otherRect = (otherCard as HTMLElement).getBoundingClientRect();
+                          const otherCenterX = otherRect.left + otherRect.width / 2;
+                          const otherCenterY = otherRect.top + otherRect.height / 2;
+                          
+                          const distance = Math.sqrt(
+                            Math.pow(centerX - otherCenterX, 2) + 
+                            Math.pow(centerY - otherCenterY, 2)
+                          );
+                          
+                          if (distance < 100 && distance < minDistance) {
+                            minDistance = distance;
+                            foundHover = idx;
+                          }
+                        });
+                      }
                       
                       setHoveredCard(foundHover);
                     }}
