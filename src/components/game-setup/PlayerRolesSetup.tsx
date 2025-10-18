@@ -31,6 +31,7 @@ export function PlayerRolesSetup() {
   };
 
   const [selectedForSwap, setSelectedForSwap] = useState<number | null>(null);
+  const [lastClickTime, setLastClickTime] = useState<{index: number, time: number} | null>(null);
 
   // Define positions OUTSIDE map so all cards can reference them
   const positions = [
@@ -42,6 +43,23 @@ export function PlayerRolesSetup() {
   ];
 
   const handleCardClick = (index: number) => {
+    const now = Date.now();
+    const DOUBLE_CLICK_THRESHOLD = 400; // 400ms for double click
+    
+    // Check for double click
+    if (lastClickTime && 
+        lastClickTime.index === index && 
+        now - lastClickTime.time < DOUBLE_CLICK_THRESHOLD) {
+      // Double click detected - set as dealer
+      setSelectedDealer(index);
+      setLastClickTime(null);
+      return;
+    }
+    
+    // Update last click time
+    setLastClickTime({ index, time: now });
+    
+    // Single click logic for swapping
     if (selectedForSwap === null) {
       // First click - select this card for swapping
       setSelectedForSwap(index);
@@ -62,14 +80,6 @@ export function PlayerRolesSetup() {
       }
       
       setSelectedForSwap(null);
-    }
-  };
-  
-  const handleDealerSelect = (index: number, e: React.MouseEvent) => {
-    // Right click or Ctrl+click to set dealer
-    if (e.ctrlKey || e.metaKey || e.button === 2) {
-      e.preventDefault();
-      setSelectedDealer(index);
     }
   };
 
@@ -107,7 +117,7 @@ export function PlayerRolesSetup() {
           >
             <h1 className="text-4xl font-bold text-gray-800">Arrange the table</h1>
             <p className="text-base text-gray-600">Click cards to swap positions</p>
-            <p className="text-sm text-amber-700">Ctrl+Click to set dealer</p>
+            <p className="text-sm text-amber-700">Double-tap to set dealer</p>
           </motion.div>
 
           {/* Square/Rectangular table with player cards */}
@@ -161,17 +171,7 @@ export function PlayerRolesSetup() {
                     <motion.div
                       whileHover={{ scale: 1.05, y: -8 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={(e) => {
-                        if (e.ctrlKey || e.metaKey) {
-                          handleDealerSelect(index, e);
-                        } else {
-                          handleCardClick(index);
-                        }
-                      }}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                        setSelectedDealer(index);
-                      }}
+                      onClick={() => handleCardClick(index)}
                       className="relative"
                     >
                       {/* Playing card with golden glow for dealer, purple glow when selected for swap */}
