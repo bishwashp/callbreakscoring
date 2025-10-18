@@ -174,13 +174,19 @@ export function PlayerRolesSetup() {
                       onClick={() => handleCardClick(index)}
                       className="relative"
                     >
-                      {/* Playing card with golden glow for dealer, purple glow when selected for swap */}
-                      <div className={`w-28 h-36 rounded-xl shadow-2xl border-4 flex flex-col items-center justify-center space-y-1 transition-all ${
+                      {/* Playing card with golden glow for dealer, purple halo when selected for swap */}
+                      <div className={`w-28 h-36 rounded-xl shadow-2xl flex flex-col items-center justify-center space-y-1 transition-all ${
+                        // Background based on dealer status
                         isDealer
-                          ? 'bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-400 border-amber-600 gold-glow'
-                          : isSelectedForSwap
-                          ? 'bg-gradient-to-br from-purple-100 via-purple-200 to-purple-100 border-purple-400 shadow-purple-500/50 shadow-2xl'
-                          : 'bg-gradient-to-br from-white via-gray-50 to-white border-gray-300'
+                          ? 'bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-400'
+                          : 'bg-gradient-to-br from-white via-gray-50 to-white'
+                      } ${
+                        // Border and glow based on selection state
+                        isSelectedForSwap
+                          ? 'border-8 border-purple-500 shadow-purple-500/80 shadow-2xl'
+                          : isDealer
+                          ? 'border-4 border-amber-600 gold-glow'
+                          : 'border-4 border-gray-300'
                       }`}>
                         <div className={`text-5xl font-bold ${suitColor}`}>
                           {suit}
