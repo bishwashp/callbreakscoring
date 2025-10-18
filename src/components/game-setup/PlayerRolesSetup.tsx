@@ -118,18 +118,20 @@ export function PlayerRolesSetup() {
                     style={{
                       left: '50%',
                       top: '50%',
-                      transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
+                      transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+                      zIndex: isDealer ? 50 : draggedCard === index ? 40 : 10
                     }}
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ 
                       scale: draggedCard === index ? 1.1 : 1, 
                       opacity: 1,
-                      zIndex: isDealer ? 50 : draggedCard === index ? 40 : 10
+                      x: 0,
+                      y: 0
                     }}
                     transition={{ delay: index * 0.1 }}
                     drag
-                    dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                    dragElastic={0.1}
+                    dragConstraints={{ left: -50, right: 50, top: -50, bottom: 50 }}
+                    dragElastic={0.2}
                     onDragStart={() => setDraggedCard(index)}
                     onDragEnd={(_, info) => {
                       setDraggedCard(null);
