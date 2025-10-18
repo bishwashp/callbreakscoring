@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
 import { formatScore } from '@/lib/scoring/calculator';
-import { ArrowUp, ArrowDown, Trophy, Eye, ChevronRight } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trophy, Eye, ChevronRight, ChevronLeft } from 'lucide-react';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
@@ -22,21 +22,64 @@ export function RoundSummary() {
     setView('call-log');
   };
 
+  const handlePreviousRound = () => {
+    // Navigate to previous round summary if available
+    if (currentGame && currentGame.currentRound > 1) {
+      // Note: This would require additional state management to view previous rounds
+      // For now, just go to call log which shows all rounds
+      setView('call-log');
+    }
+  };
+
+  const canGoBack = currentGame && currentGame.currentRound > 1;
+
   return (
     <div className="min-h-screen p-4 flex items-center justify-center">
       <div className="max-w-2xl w-full space-y-6">
-        {/* Header card */}
-        <AnimatedCard variant="floating" className="text-center">
+        {/* Header card with navigation */}
+        <AnimatedCard variant="floating" className="overflow-hidden">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="space-y-2"
+            className="relative"
           >
-            <div className="flex items-center justify-center space-x-2">
-              <Trophy className="h-8 w-8 text-amber-600 fill-amber-600" />
-              <h1 className="text-4xl font-bold text-gray-800">Round {currentGame?.currentRound}</h1>
+            {/* Navigation Buttons Row */}
+            <div className="flex items-center justify-between p-4 border-b-2 border-amber-200">
+              {/* Back Button */}
+              {canGoBack ? (
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                  <AnimatedButton
+                    onClick={handlePreviousRound}
+                    variant="secondary"
+                    className="w-12 h-12 rounded-full p-0 shadow-md"
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </AnimatedButton>
+                </motion.div>
+              ) : (
+                <div className="w-12" /> /* Spacer */
+              )}
+
+              {/* Center Content */}
+              <div className="flex-1 text-center space-y-2">
+                <div className="flex items-center justify-center space-x-2">
+                  <Trophy className="h-8 w-8 text-amber-600 fill-amber-600" />
+                  <h1 className="text-4xl font-bold text-gray-800">Round {currentGame?.currentRound}</h1>
+                </div>
+                <p className="text-amber-700 font-semibold text-lg">Round Complete!</p>
+              </div>
+
+              {/* Forward Button */}
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <AnimatedButton
+                  onClick={handleNextRound}
+                  variant="primary"
+                  className="w-12 h-12 rounded-full p-0 shadow-md"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </AnimatedButton>
+              </motion.div>
             </div>
-            <p className="text-amber-700 font-semibold text-lg">Round Complete!</p>
           </motion.div>
         </AnimatedCard>
 
