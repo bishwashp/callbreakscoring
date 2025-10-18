@@ -22,7 +22,12 @@ export function PlayerDetailsForm() {
   };
 
   const handleSubmit = () => {
-    const validation = validatePlayerNames(playerNames);
+    // Apply defaults to blank names BEFORE validation
+    const finalNames = playerNames.map((name, index) => 
+      name.trim() || `Player ${index + 1}`
+    );
+    
+    const validation = validatePlayerNames(finalNames);
     
     if (!validation.valid && !validation.errors[0].startsWith('Warning')) {
       setError(validation.errors[0]);
@@ -32,7 +37,7 @@ export function PlayerDetailsForm() {
     if (currentGame) {
       const updatedPlayers = currentGame.players.map((player, index) => ({
         ...player,
-        name: playerNames[index].trim() || `Player ${index + 1}`,
+        name: finalNames[index],
       }));
       setPlayers(updatedPlayers);
       goToNextView();

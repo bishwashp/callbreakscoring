@@ -142,41 +142,51 @@ export function PlayerRolesSetup() {
                     dragElastic={0.1}
                     dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
                     onDragStart={() => setDraggedCard(index)}
-                    onDrag={(event) => {
-                      // Calculate which card we're hovering over based on drag position
-                      const cardElement = event.currentTarget as HTMLElement;
-                      const rect = cardElement.getBoundingClientRect();
-                      const centerX = rect.left + rect.width / 2;
-                      const centerY = rect.top + rect.height / 2;
+                    onDrag={(event, info) => {
+                      // Use drag info point instead of getBoundingClientRect
+                      const draggedX = info.point.x;
+                      const draggedY = info.point.y;
                       
-                      // Get all card elements and check proximity
+                      // Get all card elements
+                      const cardElement = event.currentTarget as HTMLElement;
+                      const container = cardElement?.parentElement;
+                      if (!container) return;
+                      
                       let foundHover: number | null = null;
                       let minDistance = Infinity;
                       
-                      const container = cardElement.parentElement;
-                      if (container) {
-                        // Find all other card divs
-                        const allCards = container.querySelectorAll(':scope > div');
-                        allCards.forEach((otherCard, idx) => {
-                          if (otherCard === cardElement || idx === index) return;
-                          
-                          const otherRect = (otherCard as HTMLElement).getBoundingClientRect();
-                          const otherCenterX = otherRect.left + otherRect.width / 2;
-                          const otherCenterY = otherRect.top + otherRect.height / 2;
-                          
-                          const distance = Math.sqrt(
-                            Math.pow(centerX - otherCenterX, 2) + 
-                            Math.pow(centerY - otherCenterY, 2)
-                          );
-                          
-                          if (distance < 100 && distance < minDistance) {
-                            minDistance = distance;
-                            foundHover = idx;
-                          }
-                        });
-                      }
+                      // Check each player's position
+                      players.forEach((_, idx) => {
+                        if (idx === index) return;
+                        
+                        const pos = positions[idx];
+                        const containerRect = container.getBoundingClientRect();
+                        
+                        // Calculate center of other card
+                        let otherX = containerRect.left;
+                        let otherY = containerRect.top;
+                        
+                        if (pos.x.includes('%')) {
+                          otherX += (containerRect.width * parseFloat(pos.x)) / 100;
+                        }
+                        if (pos.y.includes('%')) {
+                          otherY += (containerRect.height * parseFloat(pos.y)) / 100;
+                        }
+                        
+                        const distance = Math.sqrt(
+                          Math.pow(draggedX - otherX, 2) + 
+                          Math.pow(draggedY - otherY, 2)
+                        );
+                        
+                        if (distance < 120 && distance < minDistance) {
+                          minDistance = distance;
+                          foundHover = idx;
+                        }
+                      });
                       
-                      setHoveredCard(foundHover);
+                      if (foundHover !== hoveredCard) {
+                        setHoveredCard(foundHover);
+                      }
                     }}
                     onDragEnd={() => {
                       if (hoveredCard !== null && draggedCard !== null) {
