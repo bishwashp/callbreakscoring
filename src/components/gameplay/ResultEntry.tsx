@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameStore } from '@/store/gameStore';
 import type { PlayerResult } from '@/types/game.types';
-import { Crown } from 'lucide-react';
+import { Crown, Check, AlertCircle, Trophy } from 'lucide-react';
+import { AnimatedCard } from '@/components/ui/animated-card';
+import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function ResultEntry() {
   const { currentGame, getCurrentDealer, getCurrentRound, enterResults, error, setHasUnsavedChanges } = useGameStore();
@@ -14,7 +15,8 @@ export function ResultEntry() {
 
   const handleResultChange = (playerId: string, value: string) => {
     const numValue = parseInt(value) || 0;
-    const newResults = { ...results, [playerId]: numValue };
+    const clampedValue = Math.max(0, Math.min(13, numValue));
+    const newResults = { ...results, [playerId]: clampedValue };
     setResults(newResults);
     
     // Mark as having unsaved changes if any result is entered
@@ -43,49 +45,84 @@ export function ResultEntry() {
   // Calculate total
   const total = Object.values(results).reduce((sum, val) => sum + (val || 0), 0);
   const isValidTotal = total === 13;
+  const allEntered = currentGame?.players.every(p => results[p.id] !== undefined && results[p.id] >= 0);
+
+  if (!currentGame || !dealer) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto space-y-4">
-        <div className="bg-white rounded-lg shadow-sm p-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Round {currentGame?.currentRound}</h2>
-            <p className="text-sm text-gray-500">Enter results</p>
-          </div>
-          {dealer && (
-            <div className="flex items-center space-x-2 text-primary">
-              <Crown className="h-5 w-5 fill-current" />
-              <span className="text-sm font-semibold">{dealer.name} (Dealer)</span>
+    <div className="min-h-screen p-4 flex items-center justify-center">
+      <div className="max-w-3xl w-full space-y-6">
+        {/* Header Card */}
+        <AnimatedCard variant="floating" className="text-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="space-y-2"
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <Trophy className="h-8 w-8 text-amber-600 fill-amber-600" />
+              <h1 className="text-4xl font-bold text-gray-800">Round {currentGame.currentRound}</h1>
             </div>
-          )}
-        </div>
+            <p className="text-amber-700 font-semibold text-lg">Count your tricks</p>
+            <div className="flex items-center justify-center space-x-2 text-sm">
+              <Crown className="h-5 w-5 fill-amber-600 text-amber-600" />
+              <span className="text-gray-700 font-semibold">Dealer: <span className="text-amber-700">{dealer.name}</span></span>
+            </div>
+          </motion.div>
+        </AnimatedCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Player Results</CardTitle>
-            <CardDescription>Round {currentGame?.currentRound}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {currentGame?.players.map((player) => {
+        {/* Results Entry Card */}
+        <AnimatedCard variant="elevated">
+          <div className="p-6 space-y-5">
+            {currentGame.players.map((player, index) => {
               const call = currentRound?.calls.find(c => c.playerId === player.id)?.call;
+              const isDealer = player.seatingPosition === dealer.seatingPosition;
+              const playerResult = results[player.id];
+              const hasResult = playerResult !== undefined && playerResult >= 0;
+              
               return (
-                <div key={player.id} className="flex items-center space-x-4">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                          player.seatingPosition === dealer?.seatingPosition
-                            ? 'bg-primary text-white'
-                            : 'bg-gray-100'
-                        }`}>
-                          {player.name.charAt(0).toUpperCase()}
+                <motion.div
+                  key={player.id}
+                  initial={{ x: 300, opacity: 0, rotateY: 45 }}
+                  animate={{ x: 0, opacity: 1, rotateY: 0 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 25,
+                    delay: index * 0.1
+                  }}
+                  className={`p-5 rounded-2xl border-4 shadow-lg card-depth transition-all ${
+                    hasResult
+                      ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-300'
+                      : 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    {/* Player Info */}
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className={`w-16 h-16 rounded-xl flex items-center justify-center text-2xl font-bold shadow-md border-2 ${
+                        isDealer
+                          ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white border-amber-700'
+                          : 'bg-gradient-to-br from-gray-700 to-gray-900 text-white border-gray-600'
+                      }`}>
+                        {player.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <p className="text-xl font-bold text-gray-800">{player.name}</p>
+                          {isDealer && <Crown className="h-5 w-5 fill-amber-600 text-amber-600" />}
                         </div>
-                        <div>
-                          <p className="font-medium">{player.name}</p>
-                          <p className="text-xs text-gray-500">Called: {call}</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className="px-3 py-1 bg-blue-100 border-2 border-blue-300 rounded-lg text-sm font-bold text-blue-700">
+                            Called: {call}
+                          </span>
                         </div>
                       </div>
-                      <div className="w-28 sm:w-24 flex-shrink-0">
+                    </div>
+
+                    {/* Result Input */}
+                    <div className="flex items-center space-x-3">
+                      <div className="w-32">
                         <Input
                           type="number"
                           min="0"
@@ -93,35 +130,81 @@ export function ResultEntry() {
                           placeholder="0"
                           value={results[player.id] ?? ''}
                           onChange={(e) => handleResultChange(player.id, e.target.value)}
-                          className="text-center text-xl font-bold sm:text-lg"
+                          className="text-center text-4xl font-bold h-20 border-4 border-amber-400 focus:border-green-500 shadow-inner bg-white rounded-xl"
                         />
+                        <p className="text-xs text-center text-gray-500 mt-1 font-semibold">Tricks Won</p>
                       </div>
+                      
+                      {hasResult && (
+                        <motion.div
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ type: "spring" }}
+                        >
+                          <Check className="h-8 w-8 text-green-600" />
+                        </motion.div>
+                      )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-            
-            <div className={`p-4 rounded-lg text-center font-semibold ${
-              isValidTotal ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-            }`}>
-              Total: {total} / 13
-              {!isValidTotal && <p className="text-xs mt-1">Total must equal 13</p>}
-            </div>
+
+            {/* Total Validation */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isValidTotal ? 'valid' : 'invalid'}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                className={`p-6 rounded-2xl text-center font-bold border-4 shadow-lg ${
+                  isValidTotal
+                    ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-400'
+                    : 'bg-gradient-to-r from-red-50 to-rose-50 border-red-400'
+                }`}
+              >
+                <div className="flex items-center justify-center space-x-3">
+                  {isValidTotal ? (
+                    <Check className="h-8 w-8 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-8 w-8 text-red-600" />
+                  )}
+                  <div className="text-left">
+                    <p className={`text-3xl font-bold ${isValidTotal ? 'text-green-700' : 'text-red-700'}`}>
+                      Total: {total} / 13
+                    </p>
+                    {!isValidTotal && (
+                      <p className="text-sm text-red-600 font-semibold mt-1">
+                        Total tricks must equal 13
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
             {error && (
-              <p className="text-sm text-red-500">{error}</p>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center text-red-600 font-semibold bg-red-50 p-4 rounded-xl border-2 border-red-200"
+              >
+                {error}
+              </motion.div>
             )}
 
-            <Button 
-              onClick={handleSubmit} 
-              className="w-full" 
-              disabled={!isValidTotal}
+            {/* Submit Button */}
+            <AnimatedButton
+              onClick={handleSubmit}
+              className="w-full h-16 text-xl shadow-xl"
+              variant="success"
+              disabled={!isValidTotal || !allEntered}
+              icon={<Check className="h-6 w-6" />}
             >
-              Done
-            </Button>
-          </CardContent>
-        </Card>
+              Confirm Results
+            </AnimatedButton>
+          </div>
+        </AnimatedCard>
       </div>
     </div>
   );

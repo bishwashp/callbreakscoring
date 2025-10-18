@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameStore } from '@/store/gameStore';
-import { Play, Plus, Trash2, Users, History } from 'lucide-react';
+import { Play, Plus, Trash2, Users, History, Trophy } from 'lucide-react';
 import { formatScore } from '@/lib/scoring/calculator';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -148,37 +148,54 @@ export function HomeScreen() {
 
         {/* Active Game Card */}
         {hasActiveGame && !showDeleteConfirm && (
-          <AnimatedCard variant="elevated" className="border-amber-400 border-4">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Game in Progress</span>
-                <span className="text-sm font-normal text-primary">
+          <AnimatedCard variant="elevated" className="bg-gradient-to-br from-amber-50 via-white to-amber-50">
+            <CardHeader className="border-b-4 border-amber-200">
+              <CardTitle className="flex items-center justify-between text-gray-800">
+                <div className="flex items-center space-x-2">
+                  <Trophy className="h-6 w-6 text-amber-600 fill-amber-600" />
+                  <span>Game in Progress</span>
+                </div>
+                <div className="px-3 py-1 bg-gradient-to-r from-amber-400 to-amber-600 text-white rounded-full text-sm font-bold">
                   Round {currentGame.currentRound} of 5
-                </span>
+                </div>
               </CardTitle>
-              <CardDescription>
-                Continue your current game
+              <CardDescription className="text-gray-700 font-semibold">
+                Continue your match
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               {/* Players Preview */}
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Users className="h-4 w-4" />
-                <span>{currentGame.players.map(p => p.name).join(', ')}</span>
+              <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-xl border-2 border-blue-200">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-blue-900 uppercase tracking-wide">Players</p>
+                  <p className="text-sm font-semibold text-gray-800">{currentGame.players.map(p => p.name).join(', ')}</p>
+                </div>
               </div>
 
               {/* Current Scores */}
               {currentScores && (
-                <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-                  <p className="text-xs font-semibold text-gray-500 uppercase">Current Standings</p>
-                  <div className="space-y-1">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border-2 border-green-200">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <Trophy className="h-5 w-5 text-green-700 fill-green-700" />
+                    <p className="text-sm font-bold text-green-900 uppercase tracking-wide">Current Standings</p>
+                  </div>
+                  <div className="space-y-2">
                     {currentScores.slice(0, 3).map((score, index) => (
-                      <div key={score.playerId} className="flex items-center justify-between text-sm">
-                        <span className="flex items-center space-x-2">
-                          <span className="text-gray-400">#{index + 1}</span>
-                          <span className="font-medium">{score.playerName}</span>
+                      <div key={score.playerId} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 shadow-sm">
+                        <span className="flex items-center space-x-3">
+                          <span className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm ${
+                            index === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-600 text-white' :
+                            index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' :
+                            'bg-gradient-to-br from-orange-400 to-orange-600 text-white'
+                          }`}>
+                            {index + 1}
+                          </span>
+                          <span className="font-bold text-gray-800">{score.playerName}</span>
                         </span>
-                        <span className={`font-semibold ${
+                        <span className={`font-bold text-lg ${
                           score.cumulativeScore > 0 ? 'text-green-600' :
                           score.cumulativeScore < 0 ? 'text-red-600' :
                           'text-gray-600'
@@ -192,11 +209,10 @@ export function HomeScreen() {
               )}
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <AnimatedButton 
                   onClick={handleResumeGame} 
-                  className="w-full"
-                  size="lg"
+                  className="w-full h-14 text-base shadow-lg"
                   variant="success"
                   icon={<Play className="h-5 w-5" />}
                 >
@@ -205,8 +221,7 @@ export function HomeScreen() {
                 <AnimatedButton 
                   onClick={handleCancelGame}
                   variant="danger"
-                  className="w-full"
-                  size="lg"
+                  className="w-full h-14 text-base shadow-lg"
                   icon={<Trash2 className="h-5 w-5" />}
                 >
                   Cancel Game
