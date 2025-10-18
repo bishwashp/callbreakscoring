@@ -9,6 +9,9 @@ export function PlayerRolesSetup() {
   const { currentGame, setInitialDealer, updateSeatingOrder, setView, goToPreviousView } = useGameStore();
   const [selectedDealer, setSelectedDealer] = useState(0);
   const [players, setPlayers] = useState(currentGame?.players || []);
+  const [selectedForSwap, setSelectedForSwap] = useState<number | null>(null);
+  const [lastClickTime, setLastClickTime] = useState<{index: number, time: number} | null>(null);
+  const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Update local players state when currentGame.players changes
   useEffect(() => {
@@ -17,6 +20,15 @@ export function PlayerRolesSetup() {
       setSelectedDealer(0); // Reset dealer selection for new game
     }
   }, [currentGame?.players]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+      }
+    };
+  }, [clickTimeout]);
 
   const handleSubmit = () => {
     updateSeatingOrder(players);
@@ -30,9 +42,6 @@ export function PlayerRolesSetup() {
     return suits[index % 4];
   };
 
-  const [selectedForSwap, setSelectedForSwap] = useState<number | null>(null);
-  const [lastClickTime, setLastClickTime] = useState<{index: number, time: number} | null>(null);
-
   // Define positions OUTSIDE map so all cards can reference them
   const positions = [
     { x: '50%', y: '0%', translateX: '-50%', translateY: '0%' },     // Top
@@ -45,13 +54,23 @@ export function PlayerRolesSetup() {
   const handleCardClick = (index: number) => {
     const now = Date.now();
     const DOUBLE_CLICK_THRESHOLD = 400; // 400ms for double click
+    const SINGLE_CLICK_DELAY = 300; // Delay single click to detect double click
     
     // Check for double click
     if (lastClickTime && 
         lastClickTime.index === index && 
         now - lastClickTime.time < DOUBLE_CLICK_THRESHOLD) {
-      // Double click detected - set as dealer
+      // Double click detected!
+      
+      // Cancel any pending single-click action
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+        setClickTimeout(null);
+      }
+      
+      // Set as dealer and clear selection state
       setSelectedDealer(index);
+      setSelectedForSwap(null);
       setLastClickTime(null);
       return;
     }
@@ -59,28 +78,39 @@ export function PlayerRolesSetup() {
     // Update last click time
     setLastClickTime({ index, time: now });
     
-    // Single click logic for swapping
-    if (selectedForSwap === null) {
-      // First click - select this card for swapping
-      setSelectedForSwap(index);
-    } else if (selectedForSwap === index) {
-      // Clicked same card - deselect
-      setSelectedForSwap(null);
-    } else {
-      // Second click - swap the two cards
-      const newPlayers = [...players];
-      [newPlayers[selectedForSwap], newPlayers[index]] = [newPlayers[index], newPlayers[selectedForSwap]];
-      setPlayers(newPlayers);
-      
-      // Update dealer index if dealer was involved in swap
-      if (selectedDealer === selectedForSwap) {
-        setSelectedDealer(index);
-      } else if (selectedDealer === index) {
-        setSelectedDealer(selectedForSwap);
-      }
-      
-      setSelectedForSwap(null);
+    // Cancel any existing timeout
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
     }
+    
+    // Delay single-click action to see if double-click is coming
+    const timeout = setTimeout(() => {
+      // Single click logic for swapping
+      if (selectedForSwap === null) {
+        // First click - select this card for swapping
+        setSelectedForSwap(index);
+      } else if (selectedForSwap === index) {
+        // Clicked same card - deselect
+        setSelectedForSwap(null);
+      } else {
+        // Second click - swap the two cards
+        const newPlayers = [...players];
+        [newPlayers[selectedForSwap], newPlayers[index]] = [newPlayers[index], newPlayers[selectedForSwap]];
+        setPlayers(newPlayers);
+        
+        // Update dealer index if dealer was involved in swap
+        if (selectedDealer === selectedForSwap) {
+          setSelectedDealer(index);
+        } else if (selectedDealer === index) {
+          setSelectedDealer(selectedForSwap);
+        }
+        
+        setSelectedForSwap(null);
+      }
+      setClickTimeout(null);
+    }, SINGLE_CLICK_DELAY);
+    
+    setClickTimeout(timeout);
   };
 
   return (
