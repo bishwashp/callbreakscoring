@@ -33,6 +33,15 @@ export function PlayerRolesSetup() {
   const [draggedCard, setDraggedCard] = useState<number | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
+  // Define positions OUTSIDE map so all cards can reference them
+  const positions = [
+    { x: '50%', y: '0%', translateX: '-50%', translateY: '0%' },     // Top
+    { x: '100%', y: '50%', translateX: '-100%', translateY: '-50%' }, // Right
+    { x: '50%', y: '100%', translateX: '-50%', translateY: '-100%' }, // Bottom
+    { x: '0%', y: '50%', translateX: '0%', translateY: '-50%' },     // Left
+    { x: '25%', y: '0%', translateX: '-50%', translateY: '0%' },     // Top-left (5th player)
+  ];
+
   const swapPlayers = (index1: number, index2: number) => {
     const newPlayers = [...players];
     [newPlayers[index1], newPlayers[index2]] = [newPlayers[index2], newPlayers[index1]];
@@ -103,17 +112,6 @@ export function PlayerRolesSetup() {
                 const isDealer = selectedDealer === index;
                 const suit = getCardSuitForPosition(index);
                 const suitColor = ['♥', '♦'].includes(suit) ? 'text-red-600' : 'text-gray-800';
-                
-                // Position cards around the rectangular table
-                // Top, Right, Bottom, Left arrangement
-                const positions = [
-                  { x: '50%', y: '0%', translateX: '-50%', translateY: '0%' },     // Top
-                  { x: '100%', y: '50%', translateX: '-100%', translateY: '-50%' }, // Right
-                  { x: '50%', y: '100%', translateX: '-50%', translateY: '-100%' }, // Bottom
-                  { x: '0%', y: '50%', translateX: '0%', translateY: '-50%' },     // Left
-                  { x: '25%', y: '0%', translateX: '-50%', translateY: '0%' },     // Top-left (5th player)
-                ];
-                
                 const pos = positions[index] || positions[0];
 
                 return (
