@@ -7,7 +7,7 @@ import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function GameComplete() {
-  const { currentGame, getWinner, setView } = useGameStore();
+  const { currentGame, getWinner, setView, restartGameWithSamePlayers } = useGameStore();
   const winner = getWinner();
 
   // Get final standings
@@ -27,6 +27,10 @@ export function GameComplete() {
 
   const handleViewCallLog = () => {
     setView('call-log');
+  };
+
+  const handlePlayAgain = () => {
+    restartGameWithSamePlayers();
   };
 
   return (
@@ -211,23 +215,36 @@ export function GameComplete() {
         </AnimatedCard>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-4">
+          {/* Primary action - Play Again */}
           <AnimatedButton
-            variant="secondary"
-            onClick={handleViewCallLog}
-            className="w-full h-16 text-lg"
-            icon={<Eye className="h-6 w-6" />}
+            onClick={handlePlayAgain}
+            className="w-full h-20 text-xl font-bold"
+            variant="default"
+            icon={<Sparkles className="h-7 w-7" />}
           >
-            View Full Ledger
+            🎮 Play Again with Same Players
           </AnimatedButton>
-          <AnimatedButton
-            onClick={handleGoHome}
-            className="w-full h-16 text-lg"
-            variant="success"
-            icon={<Home className="h-6 w-6" />}
-          >
-            Return Home
-          </AnimatedButton>
+          
+          {/* Secondary actions */}
+          <div className="grid grid-cols-2 gap-4">
+            <AnimatedButton
+              variant="secondary"
+              onClick={handleViewCallLog}
+              className="w-full h-16 text-lg"
+              icon={<Eye className="h-6 w-6" />}
+            >
+              View Full Ledger
+            </AnimatedButton>
+            <AnimatedButton
+              onClick={handleGoHome}
+              className="w-full h-16 text-lg"
+              variant="success"
+              icon={<Home className="h-6 w-6" />}
+            >
+              Return Home
+            </AnimatedButton>
+          </div>
         </div>
       </div>
     </div>

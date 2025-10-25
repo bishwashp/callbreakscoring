@@ -36,6 +36,7 @@ interface GameStore {
   loadActiveGame: () => Promise<void>;
   endGame: () => void;
   newGame: () => void;
+  restartGameWithSamePlayers: () => void;
   deleteActiveGame: () => void;
   goHome: () => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
@@ -352,6 +353,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentView: 'player-count',
       error: null,
     });
+  },
+  
+  restartGameWithSamePlayers: () => {
+    const { currentGame, saveGame } = get();
+    if (!currentGame) return;
+    
+    // Create a new game with the same players and settings
+    const newGameId = crypto.randomUUID();
+    const round1 = createRound(1, currentGame.initialDealerIndex);
+    
+    set({
+      currentGame: {
+        id: newGameId,
+        createdAt: new Date(),
+        status: 'in-progress',
+        players: currentGame.players, // Keep same players
+        rounds: [round1],
+        currentRound: 1,
+        initialDealerIndex: currentGame.initialDealerIndex, // Keep same dealer
+        stakes: currentGame.stakes, // Keep same stakes if they exist
+      },
+      currentView: 'player-calls',
+      error: null,
+      hasUnsavedChanges: false,
+    });
+    
+    saveGame();
   },
   
   deleteActiveGame: async () => {
