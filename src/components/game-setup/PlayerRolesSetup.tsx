@@ -131,7 +131,7 @@ export function PlayerRolesSetup() {
             {/* Green felt table - rectangular */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0">
               <motion.div 
-                className="w-80 h-64 rounded-3xl bg-gradient-to-br from-green-700 via-green-800 to-green-900 shadow-2xl"
+                className="w-80 h-64 rounded-3xl bg-gradient-to-br from-blue-800 via-blue-900 to-slate-950 shadow-2xl"
                 style={{
                   boxShadow: 'inset 0 0 60px rgba(0,0,0,0.3), 0 20px 40px rgba(0,0,0,0.4)'
                 }}
