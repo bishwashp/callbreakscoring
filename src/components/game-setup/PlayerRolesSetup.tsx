@@ -25,7 +25,15 @@ export function PlayerRolesSetup() {
   const handleSubmit = () => {
     updateSeatingOrder(players);
     setInitialDealer(selectedDealer);
-    setView('stakes-setup');
+    
+    // If restarting a game with existing stakes, skip stakes setup and start game
+    if (currentGame?.stakes) {
+      // Game will be started by the stakes-setup flow, so navigate there
+      // but it will immediately start the game since stakes exist
+      setView('stakes-setup');
+    } else {
+      setView('stakes-setup');
+    }
   };
 
   // Card-themed seating positions
@@ -107,8 +115,14 @@ export function PlayerRolesSetup() {
             animate={{ scale: 1, opacity: 1 }}
             className="text-center space-y-2"
           >
-            <h1 className="text-4xl font-bold text-gray-800">Arrange the table</h1>
-            <p className="text-base text-gray-600">Tap cards to swap positions</p>
+            <h1 className="text-4xl font-bold text-gray-800">
+              {currentGame?.stakes ? 'Review Seating' : 'Arrange the table'}
+            </h1>
+            <p className="text-base text-gray-600">
+              {currentGame?.stakes
+                ? 'Review seating from previous game or make changes'
+                : 'Tap cards to swap positions'}
+            </p>
             <p className="text-sm text-amber-700">Tap crown button to set dealer</p>
           </motion.div>
 

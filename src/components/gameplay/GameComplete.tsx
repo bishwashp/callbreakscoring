@@ -223,7 +223,7 @@ export function GameComplete() {
             variant="default"
             icon={<Sparkles className="h-7 w-7" />}
           >
-            🎮 Play Again with Same Players
+            🎮 New Game - Review Seating & Start
           </AnimatedButton>
           
           {/* Secondary actions */}

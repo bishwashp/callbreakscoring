@@ -356,30 +356,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
   
   restartGameWithSamePlayers: () => {
-    const { currentGame, saveGame } = get();
+    const { currentGame } = get();
     if (!currentGame) return;
     
-    // Create a new game with the same players and settings
+    // Create a new game with the same players and settings, but in setup mode
     const newGameId = crypto.randomUUID();
-    const round1 = createRound(1, currentGame.initialDealerIndex);
     
     set({
       currentGame: {
         id: newGameId,
         createdAt: new Date(),
-        status: 'in-progress',
+        status: 'setup', // Keep in setup mode to allow seating review
         players: currentGame.players, // Keep same players
-        rounds: [round1],
+        rounds: [], // Don't create rounds yet
         currentRound: 1,
         initialDealerIndex: currentGame.initialDealerIndex, // Keep same dealer
         stakes: currentGame.stakes, // Keep same stakes if they exist
       },
-      currentView: 'player-calls',
+      currentView: 'player-roles', // Go to seating screen for review
       error: null,
       hasUnsavedChanges: false,
     });
     
-    saveGame();
+    // Note: Game will be saved when user confirms seating and starts the game
   },
   
   deleteActiveGame: async () => {
