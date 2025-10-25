@@ -123,7 +123,6 @@ export function CallEntry() {
                           }
                         }}
                         className="text-center text-4xl font-bold h-20 border-4 border-amber-300 focus:border-red-500 shadow-inner bg-white"
-                        autoFocus
                       />
                     </div>
                     <AnimatePresence>

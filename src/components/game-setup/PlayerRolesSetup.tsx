@@ -4,14 +4,15 @@ import { useGameStore } from '@/store/gameStore';
 import { Crown, ChevronLeft, Home } from 'lucide-react';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
+import { useReducedMotion, getAnimationConfig } from '@/lib/utils/performance';
 
 export function PlayerRolesSetup() {
   const { currentGame, setInitialDealer, updateSeatingOrder, setView, goToPreviousView } = useGameStore();
   const [selectedDealer, setSelectedDealer] = useState(0);
   const [players, setPlayers] = useState(currentGame?.players || []);
   const [selectedForSwap, setSelectedForSwap] = useState<number | null>(null);
-  const [lastClickTime, setLastClickTime] = useState<{index: number, time: number} | null>(null);
-  const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const animConfig = getAnimationConfig(shouldReduceMotion);
 
   // Update local players state when currentGame.players changes
   useEffect(() => {
@@ -20,15 +21,6 @@ export function PlayerRolesSetup() {
       setSelectedDealer(0); // Reset dealer selection for new game
     }
   }, [currentGame?.players]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (clickTimeout) {
-        clearTimeout(clickTimeout);
-      }
-    };
-  }, [clickTimeout]);
 
   const handleSubmit = () => {
     updateSeatingOrder(players);
@@ -51,66 +43,36 @@ export function PlayerRolesSetup() {
     { x: '25%', y: '0%', translateX: '-50%', translateY: '0%' },     // Top-left (5th player)
   ];
 
+  // Immediate swap action - no delay
   const handleCardClick = (index: number) => {
-    const now = Date.now();
-    const DOUBLE_CLICK_THRESHOLD = 400; // 400ms for double click
-    const SINGLE_CLICK_DELAY = 300; // Delay single click to detect double click
-    
-    // Check for double click
-    if (lastClickTime && 
-        lastClickTime.index === index && 
-        now - lastClickTime.time < DOUBLE_CLICK_THRESHOLD) {
-      // Double click detected!
-      
-      // Cancel any pending single-click action
-      if (clickTimeout) {
-        clearTimeout(clickTimeout);
-        setClickTimeout(null);
-      }
-      
-      // Set as dealer and clear selection state
-      setSelectedDealer(index);
+    if (selectedForSwap === null) {
+      // First tap - select this card for swapping (immediate)
+      setSelectedForSwap(index);
+    } else if (selectedForSwap === index) {
+      // Tapped same card - deselect
       setSelectedForSwap(null);
-      setLastClickTime(null);
-      return;
-    }
-    
-    // Update last click time
-    setLastClickTime({ index, time: now });
-    
-    // Cancel any existing timeout
-    if (clickTimeout) {
-      clearTimeout(clickTimeout);
-    }
-    
-    // Delay single-click action to see if double-click is coming
-    const timeout = setTimeout(() => {
-      // Single click logic for swapping
-      if (selectedForSwap === null) {
-        // First click - select this card for swapping
-        setSelectedForSwap(index);
-      } else if (selectedForSwap === index) {
-        // Clicked same card - deselect
-        setSelectedForSwap(null);
-      } else {
-        // Second click - swap the two cards
-        const newPlayers = [...players];
-        [newPlayers[selectedForSwap], newPlayers[index]] = [newPlayers[index], newPlayers[selectedForSwap]];
-        setPlayers(newPlayers);
-        
-        // Update dealer index if dealer was involved in swap
-        if (selectedDealer === selectedForSwap) {
-          setSelectedDealer(index);
-        } else if (selectedDealer === index) {
-          setSelectedDealer(selectedForSwap);
-        }
-        
-        setSelectedForSwap(null);
+    } else {
+      // Second tap - swap the two cards immediately
+      const newPlayers = [...players];
+      [newPlayers[selectedForSwap], newPlayers[index]] = [newPlayers[index], newPlayers[selectedForSwap]];
+      setPlayers(newPlayers);
+      
+      // Update dealer index if dealer was involved in swap
+      if (selectedDealer === selectedForSwap) {
+        setSelectedDealer(index);
+      } else if (selectedDealer === index) {
+        setSelectedDealer(selectedForSwap);
       }
-      setClickTimeout(null);
-    }, SINGLE_CLICK_DELAY);
-    
-    setClickTimeout(timeout);
+      
+      setSelectedForSwap(null);
+    }
+  };
+
+  // Separate explicit action to set dealer
+  const handleSetDealer = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click from firing
+    setSelectedDealer(index);
+    setSelectedForSwap(null); // Clear any swap selection
   };
 
   return (
@@ -146,8 +108,8 @@ export function PlayerRolesSetup() {
             className="text-center space-y-2"
           >
             <h1 className="text-4xl font-bold text-gray-800">Arrange the table</h1>
-            <p className="text-base text-gray-600">Click cards to swap positions</p>
-            <p className="text-sm text-amber-700">Double-tap to set dealer</p>
+            <p className="text-base text-gray-600">Tap cards to swap positions</p>
+            <p className="text-sm text-amber-700">Tap crown button to set dealer</p>
           </motion.div>
 
           {/* Square/Rectangular table with player cards */}
@@ -161,13 +123,13 @@ export function PlayerRolesSetup() {
                 }}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: 'spring' }}
+                transition={{ delay: shouldReduceMotion ? 0.1 : 0.2, ...animConfig.spring }}
               />
             </div>
 
             {/* Player cards arranged around rectangular table */}
             <div className="relative h-[400px] w-full">
-              {players.map((player, index) => {
+              {players.map((player: any, index: number) => {
                 const isDealer = selectedDealer === index;
                 const suit = getCardSuitForPosition(index);
                 const suitColor = ['♥', '♦'].includes(suit) ? 'text-red-600' : 'text-gray-800';
@@ -185,25 +147,39 @@ export function PlayerRolesSetup() {
                       zIndex: isSelectedForSwap ? 100 : isDealer ? 50 : 10
                     }}
                     initial={{ scale: 0, opacity: 0, x: pos.translateX, y: pos.translateY }}
-                    animate={{ 
+                    animate={{
                       scale: isSelectedForSwap ? 1.1 : 1,
                       opacity: 1,
                       x: pos.translateX,
                       y: isSelectedForSwap ? `calc(${pos.translateY} - 10px)` : pos.translateY
                     }}
-                    transition={{ 
-                      delay: index * 0.15, 
-                      type: 'spring',
-                      stiffness: 300,
-                      damping: 20
+                    transition={{
+                      delay: index * animConfig.staggerDelay,
+                      ...animConfig.spring
                     }}
                   >
                     <motion.div
-                      whileHover={{ scale: 1.05, y: -8 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleCardClick(index)}
                       className="relative"
                     >
+                      {/* Set as Dealer button - appears above card */}
+                      <motion.button
+                        onClick={(e: React.MouseEvent) => handleSetDealer(index, e)}
+                        className={`absolute -top-10 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                          isDealer
+                            ? 'bg-amber-500 text-white shadow-lg'
+                            : 'bg-white/90 text-gray-700 border-2 border-gray-300 hover:border-amber-400 hover:bg-amber-50'
+                        }`}
+                        whileTap={{ scale: 0.9 }}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * animConfig.staggerDelay + (shouldReduceMotion ? 0.1 : 0.2) }}
+                      >
+                        <Crown className={`h-3 w-3 inline mr-1 ${isDealer ? 'fill-white' : 'fill-amber-500'}`} />
+                        {isDealer ? 'Dealer' : 'Set Dealer'}
+                      </motion.button>
+
                       {/* Playing card with golden glow for dealer, purple halo when selected for swap */}
                       <div className={`w-28 h-36 rounded-xl shadow-2xl flex flex-col items-center justify-center space-y-1 transition-all ${
                         // Background based on dealer status
@@ -228,17 +204,6 @@ export function PlayerRolesSetup() {
                           Seat {index + 1}
                         </div>
                       </div>
-                      
-                      {/* Golden crown for dealer */}
-                      {isDealer && (
-                        <motion.div
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          className="absolute -top-4 left-1/2 -translate-x-1/2"
-                        >
-                          <Crown className="h-8 w-8 fill-amber-400 text-amber-600 drop-shadow-2xl" />
-                        </motion.div>
-                      )}
                     </motion.div>
                   </motion.div>
                 );

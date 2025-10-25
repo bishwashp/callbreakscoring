@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils/cn';
 
@@ -10,6 +10,25 @@ interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
   loading?: boolean;
   ripple?: boolean;
 }
+
+// Detect if device supports hover (not a touch-only device)
+const useHoverCapable = () => {
+  const [isHoverCapable, setIsHoverCapable] = useState(true);
+  
+  useEffect(() => {
+    // Check if device has hover capability
+    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
+    setIsHoverCapable(mediaQuery.matches);
+    
+    // Listen for changes (e.g., connecting/disconnecting external mouse)
+    const handler = (e: MediaQueryListEvent) => setIsHoverCapable(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+  
+  return isHoverCapable;
+};
 
 export const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButtonProps>(
   ({ 
@@ -39,6 +58,9 @@ export const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButton
       lg: "min-h-[56px] px-8 py-4 text-lg"
     };
 
+    // Use hover detection hook
+    const isHoverCapable = useHoverCapable();
+
     return (
       <motion.button
         ref={ref}
@@ -50,12 +72,15 @@ export const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButton
           sizes[size],
           className
         )}
-        whileHover={{ 
-          scale: 1.02,
-          y: -2,
-          transition: { type: "spring", stiffness: 400, damping: 17 }
-        }}
-        whileTap={{ 
+        // Only enable hover animations on devices with hover capability
+        {...(isHoverCapable && {
+          whileHover: {
+            scale: 1.02,
+            y: -2,
+            transition: { type: "spring", stiffness: 400, damping: 17 }
+          }
+        })}
+        whileTap={{
           scale: 0.98,
           y: 0,
           transition: { type: "spring", stiffness: 400, damping: 17 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils/cn';
+import { useReducedMotion } from '@/lib/utils/performance';
 
 interface AnimatedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -32,6 +33,7 @@ export const AnimatedInput = React.forwardRef<HTMLInputElement, AnimatedInputPro
   }, ref) => {
     const [isFocused, setIsFocused] = useState(false);
     const [value, setValue] = useState(propValue || '');
+    const shouldReduceMotion = useReducedMotion();
 
     const variants = {
       default: "bg-white border-2 border-gray-300 focus:border-primary focus:ring-4 focus:ring-primary/20",
@@ -173,8 +175,8 @@ export const AnimatedInput = React.forwardRef<HTMLInputElement, AnimatedInputPro
           )}
         </AnimatePresence>
         
-        {/* Particle effect on focus */}
-        {animated && isFocused && (
+        {/* Particle effect on focus - disabled on low-end devices */}
+        {animated && isFocused && !shouldReduceMotion && (
           <div className="absolute inset-0 pointer-events-none">
             {[...Array(3)].map((_, i) => (
               <motion.div

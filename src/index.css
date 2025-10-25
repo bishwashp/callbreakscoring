@@ -87,6 +87,15 @@
     min-height: var(--touch-target-min);
     min-width: var(--touch-target-min);
   }
+  
+  /* Eliminate 300ms tap delay on touch devices */
+  button,
+  a[role="button"],
+  input[type="submit"],
+  input[type="button"],
+  [role="button"] {
+    touch-action: manipulation;
+  }
 }
 
 @layer utilities {

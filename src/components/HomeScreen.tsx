@@ -7,10 +7,13 @@ import { formatScore } from '@/lib/scoring/calculator';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { FloatingCardDeck } from '@/components/ui/animated-card';
+import { useReducedMotion, getAnimationConfig } from '@/lib/utils/performance';
 
 export function HomeScreen() {
   const { currentGame, newGame, setView, deleteActiveGame } = useGameStore();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+  const animConfig = getAnimationConfig(shouldReduceMotion);
 
   const handleResumeGame = () => {
     if (!currentGame) return;
@@ -93,21 +96,19 @@ export function HomeScreen() {
               ].map((card, index) => (
                 <motion.div
                   key={index}
-                  initial={{ y: -100, opacity: 0, rotate: card.rotate - 180 }}
-                  animate={{ 
-                    y: 0, 
+                  initial={{ y: shouldReduceMotion ? -20 : -100, opacity: 0, rotate: shouldReduceMotion ? 0 : card.rotate - 180 }}
+                  animate={{
+                    y: 0,
                     opacity: 1,
                     rotate: card.rotate,
                     x: card.x
                   }}
                   transition={{
-                    delay: index * 0.1,
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 15
+                    delay: index * animConfig.staggerDelay,
+                    ...animConfig.spring
                   }}
-                  whileHover={{ 
-                    y: -20, 
+                  whileHover={shouldReduceMotion ? undefined : {
+                    y: -20,
                     rotate: 0,
                     scale: 1.1,
                     zIndex: 50,
