@@ -23,14 +23,13 @@ export function calculateRoundScore(call: number, result: number): number {
 
 /**
  * Apply decimal overflow rule
- * 
- * When decimal portion >= 0.13:
- * - Convert 0.13 → 1.0 base point
+ *
+ * When accumulated extra tricks reach 13 (decimal >= 1.3):
+ * - Convert 1.3 → 1.0 base point
  * - Carry remaining decimal
- * 
- * Example: 8.13 + 0.02 = 8.15 → 9.02
- * Example: 8.11 + 5.02 = 13.13 → 14.00
- * 
+ *
+ * Example: 8.13 → 9.03 (13 extra tricks = 1 base point + 3 extra remaining)
+ *
  * @param score - Score with potential overflow
  * @returns Score with overflow applied
  */
@@ -41,9 +40,12 @@ export function applyDecimalOverflow(score: number): number {
   const base = Math.floor(roundedScore);
   const decimal = Math.round((roundedScore - base) * 100);
   
-  if (decimal >= 13) {
-    const fullPoints = Math.floor(decimal / 13);
-    const remaining = decimal % 13;
+  // Check if decimal portion represents >= 13 extra tricks (>= 1.30)
+  // Since decimal can only be 0-99, we check if it would be >= 130 after adding to base
+  // This happens when the integer score would naturally overflow (e.g., 4.9 + 0.4 = 5.3)
+  if (decimal >= 130) {
+    const fullPoints = Math.floor(decimal / 130);
+    const remaining = decimal % 130;
     return base + fullPoints + (remaining / 100);
   }
   
@@ -51,18 +53,20 @@ export function applyDecimalOverflow(score: number): number {
 }
 
 /**
- * Calculate cumulative score with overflow handling
- * 
+ * Calculate cumulative score
+ *
  * @param previousCumulative - Previous cumulative score
  * @param roundScore - Score from current round
- * @returns New cumulative score with overflow applied
+ * @returns New cumulative score
  */
 export function calculateCumulativeScore(
   previousCumulative: number,
   roundScore: number
 ): number {
+  // Simply add scores - no artificial overflow
   const newScore = previousCumulative + roundScore;
-  return applyDecimalOverflow(newScore);
+  // Round to avoid floating point precision issues
+  return Math.round(newScore * 100) / 100;
 }
 
 /**
