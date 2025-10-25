@@ -13,9 +13,9 @@ export function CardBackground({
   className = ''
 }: CardBackgroundProps) {
   const variants = {
-    table: "bg-gradient-to-br from-green-800 via-green-900 to-green-950",
+    table: "bg-gradient-to-br from-blue-900 via-blue-950 to-slate-950",
     casino: "bg-gradient-to-br from-red-950 via-red-900 to-black",
-    elegant: "bg-gradient-to-br from-green-800 via-green-900 to-green-950",
+    elegant: "bg-gradient-to-br from-indigo-900 via-blue-950 to-slate-950",
     minimal: "bg-gradient-to-br from-gray-100 via-gray-50 to-white"
   };
 
@@ -104,7 +104,7 @@ export function CardTableFelt({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative">
       {/* Felt texture background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-green-700 via-green-600 to-green-800" />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-700 to-blue-900" />
       
       {/* Felt texture pattern */}
       <div 
