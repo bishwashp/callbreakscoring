@@ -1,6 +1,6 @@
 /**
- * Get the next dealer index (clockwise rotation)
- * 
+ * Get the next dealer index (anticlockwise rotation)
+ *
  * @param currentDealerIndex - Current dealer's seating position
  * @param playerCount - Total number of players
  * @returns Next dealer's seating position
@@ -9,7 +9,7 @@ export function getNextDealerIndex(
   currentDealerIndex: number,
   playerCount: number
 ): number {
-  return (currentDealerIndex + 1) % playerCount;
+  return (currentDealerIndex - 1 + playerCount) % playerCount;
 }
 
 /**
@@ -26,8 +26,8 @@ export function getDealerForRound(
   playerCount: number
 ): number {
   // Round 1 starts with initial dealer
-  // Each subsequent round rotates clockwise
+  // Each subsequent round rotates anticlockwise
   const rotations = roundNumber - 1;
-  return (initialDealerIndex + rotations) % playerCount;
+  return ((initialDealerIndex - rotations) % playerCount + playerCount) % playerCount;
 }
 

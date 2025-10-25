@@ -1,7 +1,7 @@
 /**
  * Get the calling order for players in a round
- * Player after dealer calls first, then counter-clockwise until dealer calls last
- * 
+ * Player after dealer calls first, then anticlockwise until dealer calls last
+ *
  * @param dealerIndex - The dealer's seating position
  * @param playerCount - Total number of players
  * @returns Array of player indices in calling order
@@ -9,14 +9,14 @@
 export function getCallingOrder(dealerIndex: number, playerCount: number): number[] {
   const order: number[] = [];
   
-  // Player after dealer calls first, then continues counter-clockwise until dealer calls last
+  // Player after dealer calls first, then continues anticlockwise until dealer calls last
   // If dealer is at position 2, and we have 4 players (0,1,2,3)
-  // Player after dealer (clockwise) = 3
-  // Order: 3 -> 0 -> 1 -> 2 (dealer calls last)
+  // Player after dealer (anticlockwise) = 1
+  // Order: 1 -> 0 -> 3 -> 2 (dealer calls last)
   
-  // Start from next player after dealer
+  // Start from next player after dealer (anticlockwise)
   for (let i = 0; i < playerCount; i++) {
-    const playerIndex = (dealerIndex + 1 + i) % playerCount;
+    const playerIndex = ((dealerIndex - 1 - i) % playerCount + playerCount) % playerCount;
     order.push(playerIndex);
   }
   
