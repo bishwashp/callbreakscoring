@@ -57,24 +57,24 @@ export function CallLog() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gradient-to-r from-amber-100 to-amber-50 border-b-4 border-amber-300">
-                  <th className="text-left p-4 font-bold text-gray-800 sticky left-0 bg-gradient-to-r from-amber-100 to-amber-50 z-10">
+                <tr className="bg-amber-100 border-b-4 border-amber-300">
+                  <th className="text-left p-4 font-bold text-gray-800 sticky left-0 bg-amber-100 z-10">
                     Player
                   </th>
                   {currentGame?.rounds.map((round) => (
-                    <th 
-                      key={round.roundNumber} 
+                    <th
+                      key={round.roundNumber}
                       className="text-center p-4 font-bold text-gray-800 min-w-[100px]"
                     >
                       <div className="flex flex-col items-center space-y-1">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-lg font-bold shadow-md">
+                        <div className="w-10 h-10 rounded-lg bg-amber-500 text-white flex items-center justify-center text-lg font-bold shadow-md">
                           {round.roundNumber}
                         </div>
                         <div className="text-xs text-gray-600">Round</div>
                       </div>
                     </th>
                   ))}
-                  <th className="text-center p-4 font-bold bg-gradient-to-br from-green-100 to-emerald-100 border-l-4 border-green-300 min-w-[120px]">
+                  <th className="text-center p-4 font-bold bg-green-100 border-l-4 border-green-300 min-w-[120px]">
                     <div className="flex flex-col items-center space-y-1">
                       <Trophy className="h-6 w-6 text-green-700 fill-green-700" />
                       <div className="text-gray-800">Final</div>
@@ -143,7 +143,7 @@ export function CallLog() {
                           </td>
                         );
                       })}
-                      <td className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-l-4 border-green-300">
+                      <td className="text-center p-4 bg-green-50 border-l-4 border-green-300">
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
@@ -165,7 +165,7 @@ export function CallLog() {
           </div>
           
           {/* Legend */}
-          <div className="border-t-4 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 p-4">
+          <div className="border-t-4 border-amber-200 bg-amber-50 p-4">
             <div className="flex items-center justify-center space-x-6 text-sm">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 rounded-full bg-green-600"></div>
