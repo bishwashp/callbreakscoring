@@ -5,6 +5,7 @@ import { gameRepository } from '@/lib/db/repositories/game.repository';
 import type { Game } from '@/types/game.types';
 import { formatScore } from '@/lib/scoring/calculator';
 import { ArrowLeft, Calendar, Users, Trophy, Trash2, Play, History, Award } from 'lucide-react';
+import { PageCard } from '@/components/ui/page-card';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
@@ -76,27 +77,18 @@ export function GameHistory() {
       .sort((a, b) => b.cumulativeScore - a.cumulativeScore) || [];
 
     return (
-      <div className="min-h-screen p-4">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Header */}
-          <AnimatedCard variant="floating">
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center space-x-4">
-                <AnimatedButton
-                  variant="secondary"
-                  onClick={handleBack}
-                  className="w-12 h-12 rounded-full p-0"
-                >
-                  <ArrowLeft className="h-6 w-6" />
-                </AnimatedButton>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-800">Game Details</h1>
-                  <p className="text-base text-gray-600 font-semibold">{formatDate(selectedGame.completedAt || selectedGame.createdAt)}</p>
-                </div>
-              </div>
-            </div>
-          </AnimatedCard>
-
+      <PageCard
+        topLeftButton={{
+          icon: <ArrowLeft className="h-6 w-6" />,
+          onClick: handleBack,
+          label: 'Back to list',
+        }}
+        title="Game Details"
+        subtitle={formatDate(selectedGame.completedAt || selectedGame.createdAt)}
+        variant="elevated"
+        className="max-w-4xl"
+      >
+        <div className="space-y-6">
           {/* Winner Card */}
           {winner && (
             <AnimatedCard variant="elevated" className="bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-400 border-4">
@@ -225,35 +217,25 @@ export function GameHistory() {
             </div>
           </AnimatedCard>
         </div>
-      </div>
+      </PageCard>
     );
   }
 
   // Show games list
   return (
-    <div className="min-h-screen p-4">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Header */}
-        <AnimatedCard variant="floating">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center space-x-4">
-              <AnimatedButton
-                variant="secondary"
-                onClick={handleBack}
-                className="w-12 h-12 rounded-full p-0"
-              >
-                <ArrowLeft className="h-6 w-6" />
-              </AnimatedButton>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Game History</h1>
-                <p className="text-base text-gray-600 font-semibold">
-                  {games.filter(g => g.status === 'completed').length} completed • {games.filter(g => g.status === 'in-progress').length} in progress
-                </p>
-              </div>
-            </div>
-          </div>
-        </AnimatedCard>
-
+    <PageCard
+      topLeftButton={{
+        icon: <ArrowLeft className="h-6 w-6" />,
+        onClick: handleBack,
+        label: 'Go back to home',
+      }}
+      title="Game History"
+      subtitle={`${games.filter(g => g.status === 'completed').length} completed • ${games.filter(g => g.status === 'in-progress').length} in progress`}
+      titleIcon={<History className="h-8 w-8 text-amber-600" />}
+      variant="elevated"
+      className="max-w-3xl"
+    >
+      <div className="space-y-6">
         {games.length === 0 ? (
           <AnimatedCard variant="elevated">
             <div className="p-12 text-center space-y-4">
@@ -351,6 +333,6 @@ export function GameHistory() {
           </div>
         )}
       </div>
-    </div>
+    </PageCard>
   );
 }

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { useGameStore } from '@/store/gameStore';
 import { DollarSign, ChevronLeft, Play, SkipForward, TrendingUp, Home } from 'lucide-react';
-import { AnimatedCard } from '@/components/ui/animated-card';
+import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function StakesSetup() {
@@ -38,49 +38,33 @@ export function StakesSetup() {
   const totalPot = amounts.reduce((sum, amt) => sum + amt, 0);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-lg w-full space-y-6">
-        {/* Navigation buttons */}
+    <PageCard
+      topLeftButton={{
+        icon: <ChevronLeft className="h-6 w-6" />,
+        onClick: goToPreviousView,
+        label: 'Go back',
+      }}
+      topRightButtons={[{
+        icon: <Home className="h-6 w-6" />,
+        onClick: () => setView('home'),
+        label: 'Go to home',
+      }]}
+      title="Stakes Setup"
+      subtitle="Define payouts by rank (optional)"
+      titleIcon={
         <motion.div
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="flex justify-between"
+          className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-xl"
+          whileHover={{ scale: 1.1, rotate: 5 }}
         >
-          <AnimatedButton
-            variant="secondary"
-            onClick={goToPreviousView}
-            className="w-14 h-14 rounded-full p-0 shadow-xl"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </AnimatedButton>
-          <AnimatedButton
-            variant="secondary"
-            onClick={() => setView('home')}
-            className="w-14 h-14 rounded-full p-0 shadow-xl"
-          >
-            <Home className="h-6 w-6" />
-          </AnimatedButton>
+          <DollarSign className="h-10 w-10 text-white" />
         </motion.div>
-
-        {/* Single Card - Header + Form Combined */}
-        <AnimatedCard variant="elevated" className="space-y-8">
-          {/* Header */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="text-center space-y-2"
-          >
-            <motion.div 
-              className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mx-auto shadow-xl"
-              whileHover={{ scale: 1.1, rotate: 5 }}
-            >
-              <DollarSign className="h-10 w-10 text-white" />
-            </motion.div>
-            <h1 className="text-4xl font-bold text-gray-800">Stakes Setup</h1>
-            <p className="text-base text-gray-600">Define payouts by rank (optional)</p>
-          </motion.div>
-
-          {/* Currency Selector */}
+      }
+      variant="elevated"
+      className="max-w-lg"
+      showDivider
+    >
+      <div className="space-y-8">
+        {/* Currency Selector */}
           <div className="space-y-3">
             <label className="text-lg font-bold text-gray-700 uppercase tracking-wide">Currency</label>
             <div className="flex space-x-3">
@@ -164,29 +148,28 @@ export function StakesSetup() {
               <strong>📖 How it works:</strong> At game end, lowest scorer pays {currency}{amounts[0]}, 
               second lowest pays {currency}{amounts[1] || 0}, etc. Winner collects all!
             </p>
-          </div>
+        </div>
 
-          {/* Buttons */}
-          <div className="space-y-3 pt-2">
-            <AnimatedButton
-              onClick={handleContinue}
-              className="w-full h-16 text-xl shadow-xl"
-              variant="success"
-              icon={<Play className="h-6 w-6" />}
-            >
-              Start Game
-            </AnimatedButton>
-            <AnimatedButton
-              variant="secondary"
-              onClick={handleSkip}
-              className="w-full h-14 text-lg"
-              icon={<SkipForward className="h-5 w-5" />}
-            >
-              Skip Stakes
-            </AnimatedButton>
-          </div>
-        </AnimatedCard>
+        {/* Buttons */}
+        <div className="space-y-3 pt-2">
+          <AnimatedButton
+            onClick={handleContinue}
+            className="w-full h-16 text-xl shadow-xl"
+            variant="success"
+            icon={<Play className="h-6 w-6" />}
+          >
+            Start Game
+          </AnimatedButton>
+          <AnimatedButton
+            variant="secondary"
+            onClick={handleSkip}
+            className="w-full h-14 text-lg"
+            icon={<SkipForward className="h-5 w-5" />}
+          >
+            Skip Stakes
+          </AnimatedButton>
+        </div>
       </div>
-    </div>
+    </PageCard>
   );
 }

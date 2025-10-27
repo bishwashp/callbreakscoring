@@ -3,7 +3,7 @@ import { useGameStore } from '@/store/gameStore';
 import { formatScore } from '@/lib/scoring/calculator';
 import { calculatePayouts, formatMoney } from '@/lib/game-logic/stakes-calculator';
 import { Trophy, Medal, Award, Eye, Home, Sparkles } from 'lucide-react';
-import { AnimatedCard } from '@/components/ui/animated-card';
+import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function GameComplete() {
@@ -34,95 +34,79 @@ export function GameComplete() {
   };
 
   return (
-    <div className="min-h-screen p-4 flex items-center justify-center">
-      <div className="max-w-3xl w-full space-y-6 py-8">
-        {/* Celebration Header */}
+    <PageCard
+      topRightButtons={[{
+        icon: <Home className="h-6 w-6" />,
+        onClick: handleGoHome,
+        label: 'Go to home',
+      }]}
+      title="Victory!"
+      subtitle={winner ? `👑 Champion: ${winner.name} 👑` : undefined}
+      titleIcon={
         <motion.div
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
-          className="text-center space-y-6"
+          className="relative"
+          animate={{
+            rotate: [0, -10, 10, -10, 10, 0],
+            y: [0, -20, 0]
+          }}
+          transition={{
+            duration: 2,
+            times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+            repeat: Infinity,
+            repeatDelay: 3
+          }}
         >
-          {/* Animated Trophy */}
-          <motion.div
-            animate={{ 
-              rotate: [0, -10, 10, -10, 10, 0],
-              y: [0, -20, 0]
-            }}
-            transition={{ 
-              duration: 2,
-              times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-              repeat: Infinity,
-              repeatDelay: 3
-            }}
-            className="flex justify-center"
-          >
-            <div className="relative">
-              <div className="w-32 h-32 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-yellow-600 gold-glow">
-                <Trophy className="h-20 w-20 text-white drop-shadow-lg" />
-              </div>
-              {/* Sparkles */}
-              {[...Array(8)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute"
-                  style={{
-                    top: '50%',
-                    left: '50%',
-                  }}
-                  animate={{
-                    x: [0, Math.cos(i * 45 * Math.PI / 180) * 60],
-                    y: [0, Math.sin(i * 45 * Math.PI / 180) * 60],
-                    opacity: [1, 0],
-                    scale: [0, 1.5]
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    delay: i * 0.1,
-                    repeatDelay: 1
-                  }}
-                >
-                  <Sparkles className="h-4 w-4 text-yellow-300" />
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Title */}
-          <div className="space-y-3">
-            <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-400 drop-shadow-lg">
-              Victory!
-            </h1>
-            {winner && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="space-y-3"
-              >
-                <p className="text-2xl text-amber-100 font-semibold">👑 Champion 👑</p>
-                <p className="text-5xl font-bold text-white drop-shadow-lg">{winner.name}</p>
-                {payouts && currentGame?.stakes && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.8, type: "spring" }}
-                    className="inline-block bg-gradient-to-br from-green-400 to-emerald-600 border-4 border-green-300 rounded-2xl px-8 py-4 shadow-2xl"
-                  >
-                    <p className="text-sm text-green-50 font-bold uppercase tracking-wide">Takes Home</p>
-                    <p className="text-5xl font-bold text-white drop-shadow-lg">
-                      {currentGame.stakes.currency}{payouts[0].amountPaid.toFixed(2)}
-                    </p>
-                  </motion.div>
-                )}
-              </motion.div>
-            )}
+          <div className="w-32 h-32 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-yellow-600 gold-glow">
+            <Trophy className="h-20 w-20 text-white drop-shadow-lg" />
           </div>
+          {/* Sparkles */}
+          {[...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute"
+              style={{
+                top: '50%',
+                left: '50%',
+              }}
+              animate={{
+                x: [0, Math.cos(i * 45 * Math.PI / 180) * 60],
+                y: [0, Math.sin(i * 45 * Math.PI / 180) * 60],
+                opacity: [1, 0],
+                scale: [0, 1.5]
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                delay: i * 0.1,
+                repeatDelay: 1
+              }}
+            >
+              <Sparkles className="h-4 w-4 text-yellow-300" />
+            </motion.div>
+          ))}
         </motion.div>
+      }
+      variant="elevated"
+      className="max-w-3xl"
+    >
+      <div className="space-y-6">
+        {/* Winner payout display */}
+        {winner && payouts && currentGame?.stakes && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.3, type: "spring" }}
+            className="inline-block bg-gradient-to-br from-green-400 to-emerald-600 border-4 border-green-300 rounded-2xl px-8 py-4 shadow-2xl mx-auto"
+          >
+            <p className="text-sm text-green-50 font-bold uppercase tracking-wide text-center">Takes Home</p>
+            <p className="text-5xl font-bold text-white drop-shadow-lg text-center">
+              {currentGame.stakes.currency}{payouts[0].amountPaid.toFixed(2)}
+            </p>
+          </motion.div>
+        )}
 
         {/* Podium Display */}
-        <AnimatedCard variant="elevated" className="overflow-hidden">
+        <div className="space-y-4">
           <div className="bg-gradient-to-r from-amber-100 to-yellow-100 p-6 border-b-4 border-amber-300">
             <div className="flex items-center justify-center space-x-2">
               <Award className="h-6 w-6 text-amber-700" />
@@ -212,7 +196,7 @@ export function GameComplete() {
               );
             })}
           </div>
-        </AnimatedCard>
+        </div>
 
         {/* Action buttons */}
         <div className="space-y-4">
@@ -247,6 +231,6 @@ export function GameComplete() {
           </div>
         </div>
       </div>
-    </div>
+    </PageCard>
   );
 }

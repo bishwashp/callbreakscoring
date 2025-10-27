@@ -12,7 +12,6 @@ import { RoundSummary } from './components/gameplay/RoundSummary';
 import { CallLog } from './components/gameplay/CallLog';
 import { GameComplete } from './components/gameplay/GameComplete';
 import { GameHistory } from './components/GameHistory';
-import { GameHeader } from './components/GameHeader';
 import { CardBackground } from './components/ui/card-background';
 import { PageTransition, StaggeredChildren } from './components/ui/page-transition';
 import { CardLoadingSpinner } from './components/ui/page-transition';
@@ -31,16 +30,6 @@ function App() {
       </CardBackground>
     );
   }
-
-  // Only show header for gameplay and history views, not setup
-  const showHeader = [
-    'player-calls', 
-    'player-results', 
-    'round-summary', 
-    'call-log', 
-    'game-complete',
-    'game-history'
-  ].includes(currentView);
 
   // Determine background variant based on current view
   const getBackgroundVariant = () => {
@@ -62,8 +51,6 @@ function App() {
 
   return (
     <CardBackground variant={getBackgroundVariant()}>
-      {showHeader && <GameHeader />}
-      
       <AnimatePresence mode="wait">
         <PageTransition 
           key={currentView} 

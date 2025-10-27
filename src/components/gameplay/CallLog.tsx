@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
 import { formatScore } from '@/lib/scoring/calculator';
-import { ArrowLeft, Trophy, Scroll } from 'lucide-react';
-import { AnimatedCard } from '@/components/ui/animated-card';
+import { ArrowLeft, Trophy, Scroll, Home } from 'lucide-react';
+import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function CallLog() {
@@ -26,35 +26,26 @@ export function CallLog() {
   };
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="max-w-5xl mx-auto space-y-6 py-4">
-        {/* Header */}
-        <motion.div
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="flex items-center space-x-4"
-        >
-          <AnimatedButton
-            variant="secondary"
-            onClick={handleBack}
-            className="w-12 h-12 rounded-full"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </AnimatedButton>
-          <div className="flex items-center space-x-3">
-            <Scroll className="h-8 w-8 text-amber-400" />
-            <div>
-              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400">
-                Game Ledger
-              </h1>
-              <p className="text-amber-100 text-sm">Complete match history</p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Scorecard */}
-        <AnimatedCard variant="elevated" className="overflow-hidden">
-          <div className="overflow-x-auto">
+    <PageCard
+      topLeftButton={{
+        icon: <ArrowLeft className="h-6 w-6" />,
+        onClick: handleBack,
+        label: 'Go back',
+      }}
+      topRightButtons={[{
+        icon: <Home className="h-6 w-6" />,
+        onClick: () => setView('home'),
+        label: 'Go to home',
+      }]}
+      title="Game Ledger"
+      subtitle="Complete match history"
+      titleIcon={<Scroll className="h-8 w-8 text-amber-600" />}
+      variant="elevated"
+      className="max-w-5xl"
+      contentClassName="overflow-x-auto"
+    >
+      <div className="space-y-6">
+        <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-amber-100 border-b-4 border-amber-300">
@@ -182,8 +173,7 @@ export function CallLog() {
                 <span className="text-gray-700 font-semibold">Met Call</span>
               </div>
             </div>
-          </div>
-        </AnimatedCard>
+        </div>
 
         <AnimatedButton
           variant="secondary"
@@ -194,6 +184,6 @@ export function CallLog() {
           Back
         </AnimatedButton>
       </div>
-    </div>
+    </PageCard>
   );
 }

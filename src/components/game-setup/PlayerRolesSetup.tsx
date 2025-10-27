@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
 import { Crown, ChevronLeft, Home } from 'lucide-react';
-import { AnimatedCard } from '@/components/ui/animated-card';
+import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { useReducedMotion, getAnimationConfig } from '@/lib/utils/performance';
 
@@ -84,50 +84,27 @@ export function PlayerRolesSetup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full space-y-6">
-        {/* Navigation buttons */}
-        <motion.div
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="flex justify-between"
-        >
-          <AnimatedButton
-            variant="secondary"
-            onClick={goToPreviousView}
-            className="w-14 h-14 rounded-full p-0 shadow-xl"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </AnimatedButton>
-          <AnimatedButton
-            variant="secondary"
-            onClick={() => setView('home')}
-            className="w-14 h-14 rounded-full p-0 shadow-xl"
-          >
-            <Home className="h-6 w-6" />
-          </AnimatedButton>
-        </motion.div>
-
-        {/* Single Card with Circular Table */}
-        <AnimatedCard variant="elevated" className="space-y-8">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="text-center space-y-2"
-          >
-            <h1 className="text-4xl font-bold text-gray-800">
-              {currentGame?.stakes ? 'Review Seating' : 'Arrange the table'}
-            </h1>
-            <p className="text-base text-gray-600">
-              {currentGame?.stakes
-                ? 'Review seating from previous game or make changes'
-                : 'Tap cards to swap positions'}
-            </p>
-            <p className="text-sm text-amber-700">Tap crown button to set dealer</p>
-          </motion.div>
-
-          {/* Square/Rectangular table with player cards */}
-          <div className="relative mx-auto w-full max-w-3xl py-8">
+    <PageCard
+      topLeftButton={{
+        icon: <ChevronLeft className="h-6 w-6" />,
+        onClick: goToPreviousView,
+        label: 'Go back',
+      }}
+      topRightButtons={[{
+        icon: <Home className="h-6 w-6" />,
+        onClick: () => setView('home'),
+        label: 'Go to home',
+      }]}
+      title={currentGame?.stakes ? 'Review Seating' : 'Arrange the table'}
+      subtitle={currentGame?.stakes
+        ? 'Review seating from previous game or make changes'
+        : 'Tap cards to swap positions • Tap crown button to set dealer'}
+      variant="elevated"
+      className="max-w-2xl"
+    >
+      <div className="space-y-8">
+        {/* Square/Rectangular table with player cards */}
+        <div className="relative mx-auto w-full max-w-3xl py-8">
             {/* Green felt table - rectangular */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0">
               <motion.div 
@@ -223,17 +200,16 @@ export function PlayerRolesSetup() {
                 );
               })}
             </div>
-          </div>
+        </div>
 
-          <AnimatedButton
-            onClick={handleSubmit}
-            variant="primary"
-            className="w-full h-16 text-xl shadow-xl"
-          >
-            Continue
-          </AnimatedButton>
-        </AnimatedCard>
+        <AnimatedButton
+          onClick={handleSubmit}
+          variant="primary"
+          className="w-full h-16 text-xl shadow-xl"
+        >
+          Continue
+        </AnimatedButton>
       </div>
-    </div>
+    </PageCard>
   );
 }

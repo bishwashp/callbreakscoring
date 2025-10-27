@@ -3,16 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { useGameStore } from '@/store/gameStore';
 import type { PlayerCall } from '@/types/game.types';
-import { Crown, ChevronRight, Check } from 'lucide-react';
+import { Crown, ChevronRight, Check, Home, Menu } from 'lucide-react';
 import { getCallingOrder, getCurrentCallerIndex } from '@/lib/game-logic/call-order';
-import { AnimatedCard } from '@/components/ui/animated-card';
+import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function CallEntry() {
-  const { currentGame, getCurrentDealer, enterCalls, error, setHasUnsavedChanges } = useGameStore();
+  const { currentGame, getCurrentDealer, enterCalls, error, setHasUnsavedChanges, setView, deleteActiveGame } = useGameStore();
   const dealer = getCurrentDealer();
   const [calls, setCalls] = useState<Record<string, number>>({});
   const [currentCall, setCurrentCall] = useState<string>('');
+  const [showMenu, setShowMenu] = useState(false);
 
   if (!currentGame || !dealer) return null;
 
@@ -68,27 +69,61 @@ export function CallEntry() {
     });
   };
 
-  return (
-    <div className="min-h-screen p-4 flex items-center justify-center">
-      <div className="max-w-2xl w-full space-y-6">
-        {/* Main calling card */}
-        <AnimatedCard 
-          variant="elevated" 
-          className="bg-gradient-to-br from-amber-50 via-white to-amber-50 border-4 border-amber-200 shadow-2xl"
-        >
-          <div className="p-6 space-y-6">
-            {/* Header */}
-            <div className="text-center space-y-2">
-              <div className="flex items-center justify-center space-x-2 text-amber-700">
-                <Crown className="h-6 w-6 fill-current" />
-                <h2 className="text-3xl font-bold">Round {currentGame.currentRound}</h2>
-              </div>
-              <p className="text-sm text-gray-600">
-                Dealer: <span className="font-semibold text-amber-700">{dealer.name}</span>
-              </p>
-            </div>
+  const handleCancelGame = async () => {
+    if (confirm('Are you sure you want to cancel this game? All progress will be lost.')) {
+      await deleteActiveGame();
+      setShowMenu(false);
+    }
+  };
 
-            {/* Current player calling */}
+  return (
+    <PageCard
+      topLeftButton={{
+        icon: <Home className="h-6 w-6" />,
+        onClick: () => setView('home'),
+        label: 'Go to home',
+        showWarning: true,
+      }}
+      topRightButtons={[{
+        icon: <Menu className="h-6 w-6" />,
+        onClick: () => setShowMenu(!showMenu),
+        label: 'Open menu',
+      }]}
+      title={`Round ${currentGame.currentRound} of 5`}
+      subtitle={`Dealer: ${dealer.name}`}
+      titleIcon={<Crown className="h-6 w-6 text-amber-600 fill-amber-600" />}
+      variant="elevated"
+      className="max-w-2xl"
+    >
+      <div className="space-y-6">
+        {/* Menu dropdown */}
+        {showMenu && (
+          <>
+            <div
+              className="fixed inset-0 z-10"
+              onClick={() => setShowMenu(false)}
+            />
+            <div className="absolute right-4 top-20 w-48 bg-gradient-to-br from-amber-50 to-white rounded-xl shadow-2xl border-4 border-amber-300 py-1 z-20 card-depth">
+              <button
+                onClick={() => {
+                  setView('home');
+                  setShowMenu(false);
+                }}
+                className="w-full text-left px-4 py-3 text-base sm:text-sm font-semibold text-gray-800 hover:bg-amber-100 transition-colors touch-active min-h-[48px] flex items-center rounded-lg"
+              >
+                Go Home
+              </button>
+              <button
+                onClick={handleCancelGame}
+                className="w-full text-left px-4 py-3 text-base sm:text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors touch-active min-h-[48px] flex items-center rounded-lg"
+              >
+                Cancel Game
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Current player calling */}
             {!allCallsComplete && currentPlayer && (
               <motion.div
                 key={currentPlayer.id}
@@ -238,10 +273,8 @@ export function CallEntry() {
                 {error}
               </motion.div>
             )}
-          </div>
-        </AnimatedCard>
-      </div>
-    </div>
+        </div>
+      </PageCard>
   );
 }
 

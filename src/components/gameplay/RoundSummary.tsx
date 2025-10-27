@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
 import { formatScore } from '@/lib/scoring/calculator';
-import { ArrowUp, ArrowDown, Trophy, Eye, ChevronRight, ChevronLeft } from 'lucide-react';
-import { AnimatedCard } from '@/components/ui/animated-card';
+import { ArrowUp, ArrowDown, Trophy, Eye, ChevronRight, ChevronLeft, Home, ClipboardList } from 'lucide-react';
+import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function RoundSummary() {
@@ -33,59 +33,34 @@ export function RoundSummary() {
 
   const canGoBack = currentGame && currentGame.currentRound > 1;
 
+  const topRightButtons = [
+    {
+      icon: <ClipboardList className="h-5 w-5" />,
+      onClick: handleViewCallLog,
+      label: 'View game log',
+    },
+    {
+      icon: <Home className="h-6 w-6" />,
+      onClick: () => setView('home'),
+      label: 'Go to home',
+    }
+  ];
+
   return (
-    <div className="min-h-screen p-4 flex items-center justify-center">
-      <div className="max-w-2xl w-full space-y-6">
-        {/* Header card with navigation */}
-        <AnimatedCard variant="floating" className="overflow-hidden">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="relative"
-          >
-            {/* Navigation Buttons Row */}
-            <div className="flex items-center justify-between p-4 border-b-2 border-amber-200">
-              {/* Back Button */}
-              {canGoBack ? (
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                  <AnimatedButton
-                    onClick={handlePreviousRound}
-                    variant="secondary"
-                    className="w-12 h-12 rounded-full p-0 shadow-md"
-                  >
-                    <ChevronLeft className="h-6 w-6" />
-                  </AnimatedButton>
-                </motion.div>
-              ) : (
-                <div className="w-12" /> /* Spacer */
-              )}
-
-              {/* Center Content */}
-              <div className="flex-1 text-center space-y-2">
-                <div className="flex items-center justify-center space-x-2">
-                  <Trophy className="h-8 w-8 text-amber-600 fill-amber-600" />
-                  <h1 className="text-4xl font-bold text-gray-800">Round {currentGame?.currentRound}</h1>
-                </div>
-                <p className="text-amber-700 font-semibold text-lg">Round Complete!</p>
-              </div>
-
-              {/* Forward Button */}
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                <AnimatedButton
-                  onClick={handleNextRound}
-                  variant="primary"
-                  className="w-12 h-12 rounded-full p-0 shadow-md"
-                >
-                  <ChevronRight className="h-6 w-6" />
-                </AnimatedButton>
-              </motion.div>
-            </div>
-          </motion.div>
-        </AnimatedCard>
-
-        {/* Scores card */}
-        <AnimatedCard variant="elevated">
-          <div className="space-y-4">
+    <PageCard
+      topLeftButton={canGoBack ? {
+        icon: <ChevronLeft className="h-6 w-6" />,
+        onClick: handlePreviousRound,
+        label: 'View previous rounds',
+      } : undefined}
+      topRightButtons={topRightButtons}
+      title={`Round ${currentGame?.currentRound} Complete!`}
+      titleIcon={<Trophy className="h-8 w-8 text-amber-600 fill-amber-600" />}
+      variant="elevated"
+      className="max-w-2xl"
+    >
+      <div className="space-y-6">
+        <div className="space-y-4">
             {currentRound?.scores.map((score, index) => {
               const isPositive = score.roundScore > 0;
               const isNegative = score.roundScore < 0;
@@ -180,21 +155,20 @@ export function RoundSummary() {
                 </motion.div>
               );
             })}
-          </div>
-        </AnimatedCard>
+        </div>
 
         {/* Action buttons */}
         <div className="grid grid-cols-2 gap-4">
-          <AnimatedButton 
-            variant="secondary" 
-            onClick={handleViewCallLog} 
+          <AnimatedButton
+            variant="secondary"
+            onClick={handleViewCallLog}
             className="w-full h-14 text-base"
             icon={<Eye className="h-5 w-5" />}
           >
             View Call Log
           </AnimatedButton>
-          <AnimatedButton 
-            onClick={handleNextRound} 
+          <AnimatedButton
+            onClick={handleNextRound}
             className="w-full h-14 text-base"
             variant="primary"
             icon={<ChevronRight className="h-5 w-5" />}
@@ -203,6 +177,6 @@ export function RoundSummary() {
           </AnimatedButton>
         </div>
       </div>
-    </div>
+    </PageCard>
   );
 }
