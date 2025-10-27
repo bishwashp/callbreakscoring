@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { useGameStore } from '@/store/gameStore';
 import type { PlayerCall } from '@/types/game.types';
-import { Crown, ChevronRight, Check, Home, Menu } from 'lucide-react';
+import { Crown, ChevronRight, Check, Home, Menu, Edit2 } from 'lucide-react';
 import { getCallingOrder, getCurrentCallerIndex } from '@/lib/game-logic/call-order';
 import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -67,6 +67,14 @@ export function CallEntry() {
       
       return { player, hasCalled, isCurrentCaller, orderIndex, isDealer };
     });
+  };
+
+  const handleEditCall = (playerId: string) => {
+    const newCalls = { ...calls };
+    delete newCalls[playerId];
+    setCalls(newCalls);
+    setCurrentCall('');
+    setHasUnsavedChanges(true);
   };
 
   const handleCancelGame = async () => {
@@ -232,12 +240,21 @@ export function CallEntry() {
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="flex items-center space-x-2"
+                          className="flex items-center space-x-3"
                         >
                           <div className="text-3xl font-bold text-green-700">
                             {calls[player.id]}
                           </div>
                           <Check className="h-6 w-6 text-green-600" />
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleEditCall(player.id)}
+                            className="p-2 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 transition-colors"
+                            title="Edit call"
+                          >
+                            <Edit2 className="h-5 w-5" />
+                          </motion.button>
                         </motion.div>
                       )}
                     </motion.div>
