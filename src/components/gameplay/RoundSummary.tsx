@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
 import { formatScore } from '@/lib/scoring/calculator';
-import { ArrowUp, ArrowDown, Trophy, Eye, ChevronRight, ChevronLeft, Home, ClipboardList } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trophy, Eye, ChevronRight, Home } from 'lucide-react';
 import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
@@ -22,23 +22,7 @@ export function RoundSummary() {
     setView('call-log');
   };
 
-  const handlePreviousRound = () => {
-    // Navigate to previous round summary if available
-    if (currentGame && currentGame.currentRound > 1) {
-      // Note: This would require additional state management to view previous rounds
-      // For now, just go to call log which shows all rounds
-      setView('call-log');
-    }
-  };
-
-  const canGoBack = currentGame && currentGame.currentRound > 1;
-
   const topRightButtons = [
-    {
-      icon: <ClipboardList className="h-5 w-5" />,
-      onClick: handleViewCallLog,
-      label: 'View game log',
-    },
     {
       icon: <Home className="h-6 w-6" />,
       onClick: () => setView('home'),
@@ -48,11 +32,6 @@ export function RoundSummary() {
 
   return (
     <PageCard
-      topLeftButton={canGoBack ? {
-        icon: <ChevronLeft className="h-6 w-6" />,
-        onClick: handlePreviousRound,
-        label: 'View previous rounds',
-      } : undefined}
       topRightButtons={topRightButtons}
       title={`Round ${currentGame?.currentRound} Complete!`}
       titleIcon={<Trophy className="h-8 w-8 text-amber-600 fill-amber-600" />}
