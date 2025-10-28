@@ -15,6 +15,7 @@ import { GameHistory } from './components/GameHistory';
 import { CardBackground } from './components/ui/card-background';
 import { PageTransition, StaggeredChildren } from './components/ui/page-transition';
 import { CardLoadingSpinner } from './components/ui/page-transition';
+import { HamburgerMenu } from './components/ui/hamburger-menu';
 
 function App() {
   const { currentView, isLoading, loadActiveGame, currentGame } = useGameStore();
@@ -51,6 +52,7 @@ function App() {
 
   return (
     <CardBackground variant={getBackgroundVariant()}>
+      <HamburgerMenu />
       <AnimatePresence mode="wait">
         <PageTransition 
           key={currentView} 
