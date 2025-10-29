@@ -8,7 +8,7 @@ import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function ResultEntry() {
-  const { currentGame, getCurrentDealer, getCurrentRound, enterResults, error, setHasUnsavedChanges, setView, deleteActiveGame, restartGameWithSamePlayers } = useGameStore();
+  const { currentGame, getCurrentDealer, getCurrentRound, enterResults, error, setHasUnsavedChanges, setView, deleteActiveGame, restartGameWithSamePlayers, setShowCallLogModal } = useGameStore();
   const dealer = getCurrentDealer();
   const currentRound = getCurrentRound();
   const [results, setResults] = useState<Record<string, number>>({});
@@ -64,6 +64,11 @@ export function ResultEntry() {
     }
   };
 
+  const handleViewLedger = () => {
+    setShowCallLogModal(true);
+    setShowMenu(false);
+  };
+
   return (
     <PageCard
       topLeftButton={{
@@ -100,6 +105,12 @@ export function ResultEntry() {
                 className="w-full text-left px-4 py-3 text-base sm:text-sm font-semibold text-gray-800 hover:bg-amber-100 transition-colors touch-active min-h-[48px] flex items-center rounded-lg"
               >
                 Go Home
+              </button>
+              <button
+                onClick={handleViewLedger}
+                className="w-full text-left px-4 py-3 text-base sm:text-sm font-semibold text-purple-600 hover:bg-purple-100 transition-colors touch-active min-h-[48px] flex items-center rounded-lg"
+              >
+                View Game Ledger
               </button>
               <button
                 onClick={handleNewGameSamePlayers}

@@ -7,7 +7,7 @@ import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function GameComplete() {
-  const { currentGame, getWinner, setView, restartGameWithSamePlayers } = useGameStore();
+  const { currentGame, getWinner, setView, restartGameWithSamePlayers, setShowCallLogModal } = useGameStore();
   const winner = getWinner();
 
   // Get final standings
@@ -26,7 +26,7 @@ export function GameComplete() {
   };
 
   const handleViewCallLog = () => {
-    setView('call-log');
+    setShowCallLogModal(true);
   };
 
   const handlePlayAgain = () => {

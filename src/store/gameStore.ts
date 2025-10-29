@@ -12,6 +12,7 @@ interface GameStore {
   isLoading: boolean;
   error: string | null;
   hasUnsavedChanges: boolean;
+  showCallLogModal: boolean;
   
   // Setup Actions
   setPlayerCount: (count: number) => void;
@@ -40,6 +41,7 @@ interface GameStore {
   deleteActiveGame: () => void;
   goHome: () => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
+  setShowCallLogModal: (show: boolean) => void;
   
   // Selectors
   getCurrentDealer: () => Player | null;
@@ -65,6 +67,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   isLoading: false,
   error: null,
   hasUnsavedChanges: false,
+  showCallLogModal: false,
   
   // Setup Actions
   setPlayerCount: (count: number) => {
@@ -400,6 +403,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   
   setHasUnsavedChanges: (hasChanges: boolean) => {
     set({ hasUnsavedChanges: hasChanges });
+  },
+  
+  setShowCallLogModal: (show: boolean) => {
+    set({ showCallLogModal: show });
   },
   
   // Selectors

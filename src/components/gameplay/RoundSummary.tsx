@@ -6,7 +6,7 @@ import { PageCard } from '@/components/ui/page-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export function RoundSummary() {
-  const { currentGame, getCurrentRound, nextRound, setView } = useGameStore();
+  const { currentGame, getCurrentRound, nextRound, setView, setShowCallLogModal } = useGameStore();
   const currentRound = getCurrentRound();
 
   const handleNextRound = () => {
@@ -19,7 +19,7 @@ export function RoundSummary() {
   };
 
   const handleViewCallLog = () => {
-    setView('call-log');
+    setShowCallLogModal(true);
   };
 
   const topRightButtons = [

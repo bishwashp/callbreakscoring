@@ -10,6 +10,7 @@ import { CallEntry } from './components/gameplay/CallEntry';
 import { ResultEntry } from './components/gameplay/ResultEntry';
 import { RoundSummary } from './components/gameplay/RoundSummary';
 import { CallLog } from './components/gameplay/CallLog';
+import { CallLogModal } from './components/gameplay/CallLogModal';
 import { GameComplete } from './components/gameplay/GameComplete';
 import { GameHistory } from './components/GameHistory';
 import { CardBackground } from './components/ui/card-background';
@@ -52,8 +53,8 @@ function App() {
   return (
     <CardBackground variant={getBackgroundVariant()}>
       <AnimatePresence mode="wait">
-        <PageTransition 
-          key={currentView} 
+        <PageTransition
+          key={currentView}
           direction={getTransitionDirection()}
           className="px-4 py-6"
         >
@@ -72,6 +73,7 @@ function App() {
           </StaggeredChildren>
         </PageTransition>
       </AnimatePresence>
+      <CallLogModal />
     </CardBackground>
   );
 }
